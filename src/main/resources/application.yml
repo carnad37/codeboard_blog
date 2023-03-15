@@ -1,0 +1,19 @@
+server:
+  port: 10099
+  servlet:
+    context-path: /blog
+spring:
+  datasource:
+    url: jdbc:postgresql://193.168.123.2:30002/postgres?currentSchema=public
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: test01#
+#spring.jpa.database = ORACLE
+  jpa:
+    database: postgresql
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        hbm2ddl:
+          auto: create

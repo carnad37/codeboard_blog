@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.1'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.hhs.codeboard.blog'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.modelmapper:modelmapper:3.1.1'
+	implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.0.1'
+	implementation 'org.apache.httpcomponents.core5:httpcore5:5.2.1'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+}
+
+//dependencies {
+//	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+//	implementation 'org.springframework.boot:spring-boot-starter-security'
+//	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+//	compileOnly 'org.projectlombok:lombok'
+//	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+//	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+//	runtimeOnly 'com.mysql:mysql-connector-j'
+//	runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
+//	runtimeOnly 'io.r2dbc:r2dbc-mssql'
+//	runtimeOnly 'org.mariadb:r2dbc-mariadb:1.1.2'
+//	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+//	runtimeOnly 'org.postgresql:postgresql'
+//	runtimeOnly 'org.postgresql:r2dbc-postgresql'
+//	annotationProcessor 'org.projectlombok:lombok'
+//	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//	testImplementation 'io.projectreactor:reactor-test'
+//	testImplementation 'org.springframework.security:spring-security-test'
+//}
+
+test {
+	exclude '**/*'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
