@@ -2,15 +2,21 @@ server:
   port: 10099
   servlet:
     context-path: /blog
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://193.168.123.2:30002/postgres?currentSchema=public
+#    driver-class-name: org.postgresql.Driver
+#    username: postgres
+#    password: test01#
 spring:
   datasource:
-    url: jdbc:postgresql://193.168.123.2:30002/postgres?currentSchema=public
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: test01#
+    url: jdbc:mariadb://193.168.123.2:33660/blog
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: testdb#
 #spring.jpa.database = ORACLE
   jpa:
-    database: postgresql
+    database: mysql
     show-sql: true
     properties:
       hibernate:

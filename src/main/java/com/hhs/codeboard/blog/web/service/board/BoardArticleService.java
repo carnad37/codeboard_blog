@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +33,37 @@ public class BoardArticleService {
 
     private final SearchUtil searchUtil;
 
+    /**
+     * 게시물 저장
+     * 차후 유저 정보 포함
+     * @param request
+     * @return
+     */
+    public BoardArticleResponse saveArticle(BoardArticleRequest request) {
+        // boardSeq
+        BoardArticleEntity entity = articleDAO.findBySeqAndRegUserSeq(request.getSeq(), 1)
+                .orElseGet(()->{
+                    BoardArticleEntity supEntity = new BoardArticleEntity();
+                    supEntity.setRegDate(LocalDateTime.now());
+                    supEntity.setRegUserSeq(1);
+                    return supEntity;
+                });
 
-    public BoardArticleResponse selectArticle(@NotNull Long articleSeq, boolean publicFlag, ) throws CodeboardException {
+        // TODO :: BoardSeq값 유효성 체크 필요
+        // 현재 구조로는 타인의 board에 파라미터 위조로 입력가능해짐
+        entity.setBoardSeq(request.getBoardSeq());
+        entity.setTitle(request.getTitle());
+        entity.setSummary(request.getSummary());
+        entity.setContent(request.getContent());
+        entity.setPublicFlag(request.getPublicFlag());
+        entity.setModDate(LocalDateTime.now());
+        entity.setModUserSeq(1);
+        //entity.setCategorys(request.getCategorySeq());
+        articleDAO.save(entity);
+        return mapBoardArticle(entity);
+    }
+
+    public BoardArticleResponse selectArticle(@NotNull Long articleSeq, boolean publicFlag) throws CodeboardException {
         return mapBoardArticle(articleDAO.findById(articleSeq).orElseThrow(ErrorType.NOT_FOUND_DATA::supply));
     }
 

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -22,6 +23,8 @@ public class JWTLoginFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userToken = request.getParameter("token");
         String userSeq = request.getParameter("userSeq");
+        if (!StringUtils.hasText(userToken) || !StringUtils.hasText(userSeq)) return;
+
         // 유저정보 얻기
         String memberUrl = "http://localhost:20000/member/public/login&token=%s&userSeq=%s".formatted(userToken, userSeq);
         MemberDto memberInfo = webClient.get()

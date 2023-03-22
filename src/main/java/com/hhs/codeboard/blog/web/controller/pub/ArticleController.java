@@ -34,15 +34,15 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.selectArticleList(boardArticleRequest));
     }
 
-    /**
-     * 게시물 단건 조회
-     * @param articleSeq
-     * @return
-     */
-    @GetMapping("/find/{articleSeq}")
-    public ResponseEntity<BoardArticleResponse> findOne(@PathVariable(value = "articleSeq") Long articleSeq) {
-        boardArticleRequest.setPublicFlag("Y");
-        return ResponseEntity.ok(articleService.selectArticle(articleSeq));
-    }
+//    /**
+//     * 게시물 단건 조회
+//     * @param articleSeq
+//     * @return
+//     */
+//    @GetMapping("/find/{articleSeq}")
+//    public ResponseEntity<BoardArticleResponse> findOne(@PathVariable(value = "articleSeq") Long articleSeq) {
+//        boardArticleRequest.setPublicFlag("Y");
+//        return ResponseEntity.ok(articleService.selectArticle(articleSeq));
+//    }
 
 }

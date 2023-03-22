@@ -40,7 +40,8 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
             .requestMatchers("/public/**").permitAll()
-            .requestMatchers("/private/**").authenticated()
+            .requestMatchers("/private/**").permitAll()
+//            .requestMatchers("/private/**").authenticated()
             .anyRequest().denyAll()
             .and()
             .httpBasic().disable()

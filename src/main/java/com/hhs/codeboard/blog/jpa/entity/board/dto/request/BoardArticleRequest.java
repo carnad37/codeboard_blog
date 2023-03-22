@@ -10,10 +10,8 @@ import java.time.LocalDate;
 @Setter
 public class BoardArticleRequest {
 
-    
-
     @Parameter
-    private Integer seq;
+    private Long seq;
     private String title;
     private String content;
     private String summary;
