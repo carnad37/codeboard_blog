@@ -2,9 +2,9 @@ package com.hhs.codeboard.blog.web.service.menu;
 
 import com.hhs.codeboard.blog.enumeration.MenuSeqEnum;
 import com.hhs.codeboard.blog.enumeration.MenuTypeEnum;
-import com.hhs.codeboard.blog.jpa.entity.menu.dto.MenuDto;
-import com.hhs.codeboard.blog.jpa.entity.menu.entity.MenuEntity;
-import com.hhs.codeboard.blog.jpa.repository.MenuDAO;
+import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
+import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
+import com.hhs.codeboard.blog.data.repository.MenuDAO;
 import com.hhs.codeboard.blog.util.common.SessionUtil;
 import com.hhs.codeboard.blog.web.service.member.MemberDto;
 import jakarta.servlet.http.HttpServletRequest;

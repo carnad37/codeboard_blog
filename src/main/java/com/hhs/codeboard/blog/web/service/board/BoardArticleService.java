@@ -2,11 +2,11 @@ package com.hhs.codeboard.blog.web.service.board;
 
 import com.hhs.codeboard.blog.config.except.CodeboardException;
 import com.hhs.codeboard.blog.enumeration.ErrorType;
-import com.hhs.codeboard.blog.jpa.entity.board.dto.request.BoardArticleRequest;
-import com.hhs.codeboard.blog.jpa.entity.board.dto.response.BoardArticleResponse;
-import com.hhs.codeboard.blog.jpa.entity.board.entity.BoardArticleEntity;
-import com.hhs.codeboard.blog.jpa.repository.ArticleDAO;
-import com.hhs.codeboard.blog.jpa.repository.MenuDAO;
+import com.hhs.codeboard.blog.data.entity.board.dto.request.BoardArticleRequest;
+import com.hhs.codeboard.blog.data.entity.board.dto.response.BoardArticleResponse;
+import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleEntity;
+import com.hhs.codeboard.blog.data.repository.ArticleDAO;
+import com.hhs.codeboard.blog.data.repository.MenuDAO;
 import com.hhs.codeboard.blog.util.service.SearchUtil;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;

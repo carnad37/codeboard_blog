@@ -1,13 +1,13 @@
 package com.hhs.codeboard.blog.web.service.category;
 
-import com.hhs.codeboard.blog.jpa.entity.board.dto.BoardCategoryDto;
-import com.hhs.codeboard.blog.jpa.entity.board.entity.BoardArticleEntity;
-import com.hhs.codeboard.blog.jpa.entity.board.entity.BoardCategoryEntity;
-import com.hhs.codeboard.blog.jpa.entity.menu.entity.MenuEntity;
-import com.hhs.codeboard.blog.jpa.repository.ArticleDAO;
-import com.hhs.codeboard.blog.jpa.repository.CategoryDAO;
-import com.hhs.codeboard.blog.jpa.repository.MemberDAO;
-import com.hhs.codeboard.blog.jpa.repository.MenuDAO;
+import com.hhs.codeboard.blog.data.entity.board.dto.BoardCategoryDto;
+import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleEntity;
+import com.hhs.codeboard.blog.data.entity.board.entity.BoardCategoryEntity;
+import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
+import com.hhs.codeboard.blog.data.repository.ArticleDAO;
+import com.hhs.codeboard.blog.data.repository.CategoryDAO;
+import com.hhs.codeboard.blog.data.repository.MemberDAO;
+import com.hhs.codeboard.blog.data.repository.MenuDAO;
 import com.hhs.codeboard.blog.web.service.member.MemberDto;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.service.spi.ServiceException;

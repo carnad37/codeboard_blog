@@ -1,7 +1,7 @@
 package com.hhs.codeboard.blog.web.service.member;
 
 import com.hhs.codeboard.blog.enumeration.SecurityAuthType;
-import com.hhs.codeboard.blog.jpa.entity.member.entity.MemberEntity;
+import com.hhs.codeboard.blog.data.entity.member.entity.MemberEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 

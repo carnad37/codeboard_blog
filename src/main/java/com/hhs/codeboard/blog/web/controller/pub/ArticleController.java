@@ -1,13 +1,12 @@
 package com.hhs.codeboard.blog.web.controller.pub;
 
-import com.hhs.codeboard.blog.jpa.entity.board.dto.request.BoardArticleRequest;
-import com.hhs.codeboard.blog.jpa.entity.board.dto.response.BoardArticleResponse;
+import com.hhs.codeboard.blog.data.entity.board.dto.request.BoardArticleRequest;
+import com.hhs.codeboard.blog.data.entity.board.dto.response.BoardArticleResponse;
 import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

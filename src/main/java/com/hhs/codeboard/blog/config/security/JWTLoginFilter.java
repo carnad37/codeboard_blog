@@ -1,6 +1,6 @@
 package com.hhs.codeboard.blog.config.security;
 
-import com.hhs.codeboard.blog.jpa.entity.member.dto.MemberDto;
+import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,8 +1,8 @@
 package com.hhs.codeboard.blog.web.service.member.impl;
 
 import com.hhs.codeboard.blog.enumeration.SecurityAuthType;
-import com.hhs.codeboard.blog.jpa.entity.member.entity.MemberEntity;
-import com.hhs.codeboard.blog.jpa.repository.MemberDAO;
+import com.hhs.codeboard.blog.data.entity.member.entity.MemberEntity;
+import com.hhs.codeboard.blog.data.repository.MemberDAO;
 import com.hhs.codeboard.blog.web.service.member.MemberDto;
 import com.hhs.codeboard.blog.web.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;

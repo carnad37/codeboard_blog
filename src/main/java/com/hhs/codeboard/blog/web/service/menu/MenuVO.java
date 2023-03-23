@@ -1,6 +1,6 @@
 package com.hhs.codeboard.blog.web.service.menu;
 
-import com.hhs.codeboard.blog.jpa.entity.menu.dto.MenuDto;
+import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
 
 import java.io.Serializable;
 import java.util.List;
