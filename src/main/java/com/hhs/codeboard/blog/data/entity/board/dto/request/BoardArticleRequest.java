@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class BoardArticleRequest {
-
     @Parameter
     private Long seq;
     private String title;

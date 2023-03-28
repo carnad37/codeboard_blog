@@ -2,6 +2,7 @@ package com.hhs.codeboard.blog.config.security;
 
 import com.hhs.codeboard.blog.web.service.member.MemberService;
 import com.hhs.codeboard.blog.web.service.member.impl.MemberServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;

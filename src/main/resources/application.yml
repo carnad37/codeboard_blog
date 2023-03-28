@@ -23,3 +23,7 @@ spring:
         format_sql: true
         hbm2ddl:
           auto: create
+codeboard:
+  module:
+    member:
+      url: http://localhost:100098/member

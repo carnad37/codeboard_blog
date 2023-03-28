@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -19,6 +20,9 @@ public class JWTLoginFilter extends OncePerRequestFilter {
 
     private final WebClient webClient;
 
+    @Value("${codeboard.module.member.url}")
+    private String memberUrl;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userToken = request.getParameter("token");
@@ -26,7 +30,7 @@ public class JWTLoginFilter extends OncePerRequestFilter {
         if (!StringUtils.hasText(userToken) || !StringUtils.hasText(userSeq)) return;
 
         // 유저정보 얻기
-        String memberUrl = "http://localhost:20000/member/public/login&token=%s&userSeq=%s".formatted(userToken, userSeq);
+        String memberUrl = this.memberUrl + "/public/login&token=%s".formatted(userToken, userSeq);
         MemberDto memberInfo = webClient.get()
                 .uri(memberUrl)
                 .retrieve()
