@@ -1,7 +1,7 @@
 server:
   port: 10099
-  servlet:
-    context-path: /blog
+#  servlet:
+#    context-path: /blog
 #spring:
 #  datasource:
 #    url: jdbc:postgresql://193.168.123.2:30002/postgres?currentSchema=public
@@ -16,14 +16,18 @@ spring:
     password: testdb#
 #spring.jpa.database = ORACLE
   jpa:
-    database: mysql
-    show-sql: true
+    hibernate:
+      ddl-auto: create
     properties:
       hibernate:
+        #show_sql: true
         format_sql: true
-        hbm2ddl:
-          auto: create
+#        hbm2ddl:
+#          auto: create
 codeboard:
-  module:
-    member:
-      url: http://localhost:100098/member
+  member: http://localhost:100098/member
+logging.level:
+  org.hibernate:
+    SQL: debug
+    type: trace
+

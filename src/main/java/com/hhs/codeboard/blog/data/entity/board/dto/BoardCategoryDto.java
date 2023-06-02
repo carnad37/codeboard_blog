@@ -1,15 +1,18 @@
 package com.hhs.codeboard.blog.data.entity.board.dto;
 
-import lombok.Data;
+import com.hhs.codeboard.blog.enumeration.YN;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class BoardCategoryDto {
 
     private Integer seq;
 
     private String title;
 
-    private String useF;
+    private YN useF;
 
     private Integer boardSeq;
 

@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+
 @Getter
 @Setter
 @Entity
@@ -13,6 +15,7 @@ import lombok.Setter;
 @TableGenerator(name = CommonStaticProperty.SEQUENCE_TABLE_GENERATOR, table = CommonStaticProperty.SEQUENCE_TABLE_NAME)
 public class BoardCateItemEntity extends DefaultEntity{
 
+    @Serial
     private static final long serialVersionUID = 4507117424141720882L;
 
     @Column

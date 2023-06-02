@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hhs.codeboard.blog.config.common.CommonStaticProperty;
 import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleEntity;
 import com.hhs.codeboard.blog.data.entity.common.entity.DefaultEntity;
+import com.hhs.codeboard.blog.enumeration.MenuTypeEnum;
+import com.hhs.codeboard.blog.enumeration.YN;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 
+import java.io.Serial;
 import java.util.Collection;
 
 
@@ -19,6 +22,7 @@ import java.util.Collection;
 @TableGenerator(name = CommonStaticProperty.SEQUENCE_TABLE_GENERATOR, table = CommonStaticProperty.SEQUENCE_TABLE_NAME)
 public class MenuEntity extends DefaultEntity {
 
+    @Serial
     private static final long serialVersionUID = 6217465463857529869L;
 
     /*
@@ -39,13 +43,16 @@ public class MenuEntity extends DefaultEntity {
     private Integer menuOrder;
 
     @Column
-    private String menuType;
+    private MenuTypeEnum menuType;
 
     @Column
     private Integer parentSeq;
 
     @Column
-    private String publicFlag;
+    private YN publicFlag;
+
+    @Column
+    private String uuid;
 //
 //    /**
 //     * 해당 메뉴가 Board타입일때만 호출

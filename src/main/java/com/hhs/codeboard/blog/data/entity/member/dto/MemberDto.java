@@ -2,9 +2,13 @@ package com.hhs.codeboard.blog.data.entity.member.dto;
 
 import com.hhs.codeboard.blog.data.entity.common.dto.DefaultDateDto;
 import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collection;
 
+@Getter
+@Setter
 public class MemberDto extends DefaultDateDto {
 
     private String email;
@@ -15,8 +19,8 @@ public class MemberDto extends DefaultDateDto {
 
     private String userType;
 
-    private Integer modUserSeq;
+    private Integer userSeq;
 
-    private Collection<MenuEntity> menuList;
+//    private Collection<MenuEntity> menuList;
 
 }

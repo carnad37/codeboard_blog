@@ -1,25 +1,31 @@
 package com.hhs.codeboard.blog.web.service.menu;
 
+import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
+import com.hhs.codeboard.blog.data.entity.menu.entity.QMenuEntity;
 import com.hhs.codeboard.blog.enumeration.MenuSeqEnum;
 import com.hhs.codeboard.blog.enumeration.MenuTypeEnum;
 import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
 import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
 import com.hhs.codeboard.blog.data.repository.MenuDAO;
+import com.hhs.codeboard.blog.enumeration.YN;
 import com.hhs.codeboard.blog.util.common.SessionUtil;
-import com.hhs.codeboard.blog.web.service.member.MemberDto;
+import com.hhs.codeboard.blog.util.service.QuerySupportUtil;
+import com.hhs.codeboard.blog.util.service.SecurityUtil;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.service.spi.ServiceException;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.querydsl.core.types.Predicate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 @Transactional
 @Service
@@ -27,8 +33,12 @@ import java.util.Map;
 public class MenuService {
 
     private final MenuDAO menuDAO;
-
     private final ModelMapper modelMapper;
+    private final JPAQueryFactory jpaQueryFactory;
+    private final QuerySupportUtil queryUtil;
+    private final SecurityUtil securityUtil;
+
+    private final QMenuEntity menu = QMenuEntity.menuEntity;
 
     public List<MenuEntity> selectAllBoardMenu(int regUserSeq) {
         List<MenuEntity> resultList = new ArrayList<>();
@@ -44,8 +54,66 @@ public class MenuService {
         return menuList;
     }
 
-    public MenuEntity selectMenu(int regUserSeq, int menuSeq) throws Exception{
-        return menuDAO.findBySeqAndRegUserSeqAndDelDateIsNull(menuSeq, regUserSeq).orElseThrow(()->new Exception("잘못된 접근입니다."));
+    /**
+     * 단일 객체 확인
+     *
+     * 단일 객체에선 타인것도 조회 가능해야함.
+     * 다만 타인건 무조건 공개된것만.
+     * @param menuDto
+     * @return
+     * @throws RuntimeException
+     */
+    public MenuDto selectOne(MenuDto menuDto) throws RuntimeException {
+        if (menuDto.getSeq() == null || menuDto.getSeq() < 1) {
+            throw new RuntimeException("타겟 ㄱ 정보가 없습니다.");
+        } else {
+            menuDto.setRegUserSeq(null);
+        }
+
+        if (!securityUtil.isLogin()) {
+            // 로그인시가 아니면 무조건 공개만 확인가능
+            menuDto.setPublicFlag(YN.Y);
+        }
+
+        Predicate[] wheres = getDefaultCondition(menuDto);
+
+        return Optional.ofNullable(
+                jpaQueryFactory.selectFrom(menu)
+                    .where(wheres)
+                    .fetchOne())
+            .map(this::mapMenu)
+            .orElseThrow(()->new RuntimeException("타겟 메뉴 정보가 없습니다."));
+    }
+
+    public Page<MenuDto> selectAll(MenuDto menuDto) throws RuntimeException {
+        if (menuDto.getRegUserSeq() == null || menuDto.getRegUserSeq() < 1) throw new RuntimeException("타겟 유저 정보가 없습니다.");
+
+        if (securityUtil.getUserSeq() != menuDto.getRegUserSeq()) {
+            // 본인 타겟 메뉴 조회가 아닌경우 무조건 전체 공개만
+            menuDto.setPublicFlag(YN.Y);
+        }
+
+        Predicate[] wheres = getDefaultCondition(menuDto);
+
+        JPAQuery<MenuEntity> resultList = jpaQueryFactory.selectFrom(menu)
+            .where(wheres);
+
+        JPAQuery<Long> totalCnt = jpaQueryFactory.select(menu.count()).from(menu)
+                .where(wheres);
+
+        return queryUtil.getPage(resultList, menuDto, totalCnt::fetchOne, this::mapMenu);
+
+    }
+
+    /**
+     * 메뉴가 있는지 확
+     * @param menuDto
+     * @return
+     */
+    public boolean existMenu(MenuDto menuDto) {
+//        commonSelectChecker(menuDto);
+        Predicate[] wheres = getDefaultCondition(menuDto);
+        return jpaQueryFactory.selectOne().from(menu).where(wheres).fetchOne() != null;
     }
 
     public MenuEntity selectMenu(int regUserSeq, String uuid) throws Exception{
@@ -53,38 +121,40 @@ public class MenuService {
         return null;
     }
 
-    public void insertMenu(MenuDto menu, MemberDto memberDto, MenuTypeEnum menuType) throws Exception {
-        if (!MenuTypeEnum.BOARD.equals(menuType) && menu.getParentSeq() > 0) {
-            //parentSeq 체크, 없으면 exception
-            selectMenu(memberDto.getSeq(), menu.getParentSeq());
+    public void insertMenu(MenuDto menu, MemberDto memberDto) throws Exception {
+        MenuTypeEnum menuType = menu.getMenuType();
+
+        if (!MenuTypeEnum.BOARD.equals(menuType) && !MenuTypeEnum.MENU.equals(menuType)) throw new Exception("허용되지 않은 타입입니다.");
+
+        if (menu.getParentSeq() > 0) {
+
         } else {
             menu.setParentSeq(MenuSeqEnum.ROOT_MENU.getMenuSeq());
         }
 
         MenuEntity insert = new MenuEntity();
         insert.setTitle(menu.getTitle());
-        insert.setMenuType(menuType.getMenuType());
-        insert.setPublicFlag(menu.getPublicF());
+        insert.setMenuType(menuType);
+        insert.setPublicFlag(menu.getPublicFlag());
         insert.setMenuOrder(menu.getMenuOrder());
         insert.setParentSeq(menu.getParentSeq());
-        insert.setRegUserSeq(memberDto.getSeq());
+        insert.setRegUserSeq(memberDto.getUserSeq());
         insert.setRegDate(LocalDateTime.now());
-//        insert.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+        insert.setUuid(Pattern.compile("-").matcher(UUID.randomUUID().toString()).replaceAll(""));
         menuDAO.save(insert);
     }
 
-    public void updateMenu(MenuDto menu, MemberDto memberDto, MenuTypeEnum menuType) throws Exception {
-        if (!MenuTypeEnum.BOARD.equals(menuType) && menu.getParentSeq() > 0) {
-            //parentSeq 체크, 없으면 exception
-            selectMenu(memberDto.getSeq(), menu.getParentSeq());
+    public void updateMenu(MenuDto menuDto, MemberDto memberDto, MenuTypeEnum menuType) throws Exception {
+        if (!MenuTypeEnum.BOARD.equals(menuType) && menuDto.getParentSeq() > 0) {
+            checkParentMenu(menuDto.getParentSeq());
         }
 
-        MenuEntity update = getMenu(menu, memberDto);
-        update.setTitle(menu.getTitle());
-        update.setModUserSeq(memberDto.getSeq());
-        update.setMenuOrder(menu.getMenuOrder());
-        update.setParentSeq(menu.getParentSeq());
-        update.setPublicFlag(menu.getPublicF());
+        MenuEntity update = getMenu(menuDto, memberDto);
+        update.setTitle(menuDto.getTitle());
+        update.setModUserSeq(menuDto.getModUserSeq());
+        update.setMenuOrder(menuDto.getMenuOrder());
+        update.setParentSeq(menuDto.getParentSeq());
+        update.setPublicFlag(menuDto.getPublicFlag());
         update.setModDate(LocalDateTime.now());
         menuDAO.save(update);
     }
@@ -120,7 +190,7 @@ public class MenuService {
      */
     public List<MenuVO> initMenuList(MemberDto memberDto, HttpServletRequest request) {
 
-        List<MenuEntity> dbMenuList = menuDAO.findAllByRegUserSeqAndDelDateIsNull(memberDto.getSeq(), Sort.by(Sort.Direction.ASC, "menuOrder"));
+        List<MenuEntity> dbMenuList = menuDAO.findAllByRegUserSeqAndDelDateIsNull(memberDto.getUserSeq(), Sort.by(Sort.Direction.ASC, "menuOrder"));
 
         List<MenuVO> menuList = new ArrayList<>();
         List<MenuVO> setInnerList = new ArrayList<>();
@@ -132,20 +202,20 @@ public class MenuService {
         MenuDto setMenu = new MenuDto();
         setMenu.setSeq(0);
         setMenu.setTitle("공통메뉴");
-        setMenu.setMenuType(MenuTypeEnum.STATIC_MENU.getMenuType());
+        setMenu.setMenuType(MenuTypeEnum.STATIC_MENU);
         constMenuVO.setMenu(setMenu);
 
         //공통게시판 내용추가
         setMenu = new MenuDto();
         setMenu.setSeq(0);
         setMenu.setTitle("게시판 목록");
-        setMenu.setMenuType(MenuTypeEnum.BOARD_CONFIG.getMenuType());
+        setMenu.setMenuType(MenuTypeEnum.BOARD_CONFIG);
         setInnerList.add(new MenuVO(setMenu));
 
         setMenu = new MenuDto();
         setMenu.setSeq(0);
         setMenu.setTitle("메뉴 목록");
-        setMenu.setMenuType(MenuTypeEnum.MENU_CONFIG.getMenuType());
+        setMenu.setMenuType(MenuTypeEnum.MENU_CONFIG);
         setInnerList.add(new MenuVO(setMenu));
 //        setInnerList.add(new MenuVO(new MenuEntity(0, "카테고리 설정", MenuTypeEnum.CATEGORY_CONFIG.getMenuType())));
 
@@ -222,7 +292,7 @@ public class MenuService {
         for (MenuVO childrenVO : targetVO.getChildrenMenu()) {
             childrenVO.setDepth(selfDepth);
             int depth = getMaxDepth(childrenVO, selfDepth, maxDepth);
-            maxDepth = depth > maxDepth ? depth : maxDepth;
+            maxDepth = Math.max(depth, maxDepth);
         }
 
         return maxDepth;
@@ -242,52 +312,32 @@ public class MenuService {
         return null;
     }
 
-    //Deprecated :: 2021-07-18 :: 상위기능이 사용안하게됨
-//    /**
-//     *
-//     * @param targetList
-//     * @param delSeqs
-//     * @param regUserSeq
-//     * @throws Exception
-//     */
-//    public void txUpdateDepth(List<List<MenuEntity>> targetList, String[] delSeqs, int regUserSeq) throws Exception {
-//
-//        List<MenuEntity> beforeList = menuDAO.findAllByRegUserSeqAndDelDateIsNull(regUserSeq);
-//        //seq로 Map생성
-//        Map<Integer, MenuEntity> beforeMap = beforeList.stream()
-//                .collect(Collectors.toMap(
-//                    MenuEntity::getSeq,
-//                    Function.identity()
-//                ));
-//
-//        for(List<MenuEntity> unitList : targetList) {
-//            for(MenuEntity target : unitList) {
-//                MenuEntity updateEntity = null;
-//                if (target.getSeq() > 0) {
-//                    //수정된 데이터
-//                    updateEntity = beforeMap.get(target.getSeq());
-//                    updateEntity.setModDate(LocalDateTime.now());
-//                    updateEntity.setModUserSeq(regUserSeq);
-//                    updateEntity.setMenuOrder(target.getMenuOrder());
-//                    updateEntity.setPublicF(target.getPublicF());
-//                    updateEntity.setTitle(target.getTitle());
-//                    updateEntity.setParentSeq(target.getParentSeq());
-//                } else {
-//                    //새로 입력된 데이터
-//                    updateEntity = new MenuEntity();
-//                    updateEntity.setRegDate(LocalDateTime.now());
-//                    updateEntity.setRegUserSeq(regUserSeq);
-//                    updateEntity.setMenuOrder(target.getMenuOrder());
-//                    updateEntity.setPublicF(target.getPublicF());
-//                    updateEntity.setTitle(target.getTitle());
-//                    updateEntity.setParentSeq(target.getParentSeq());
-//                }
-//                menuDAO.save(updateEntity);
-//            }
-//        }
-//
-//        //TODO :: 삭제는 차후에 추가
-//
-//    }
+    private void checkParentMenu(int parentSeq) throws RuntimeException {
+        // 메뉴수정을 위해 상위메뉴 정보를 체크하는 기능이므로 반드시 로그인 여부가 필요.
+        // parentSeq 체크, 없으면 exception
+        MenuDto menuDto = new MenuDto();
+        menuDto.setRegUserSeq(securityUtil.getUserSeq());
+        menuDto.setSeq(parentSeq);
+        if (!existMenu(menuDto)) throw new RuntimeException("상위 메뉴가 없습니다.");
+    }
+
+    private Predicate[] getDefaultCondition(MenuDto menuDto) {
+        return new Predicate[]{
+                queryUtil.integer(menuDto.getSeq(), menu.seq::eq),
+                queryUtil.integer(menuDto.getRegUserSeq(), menu.regUserSeq::eq),
+                menuDto.getPublicFlag() != null ? menu.publicFlag.eq(menuDto.getPublicFlag()) : null,
+                menu.delDate.isNull()
+        };
+    }
+
+    /**
+     * entity, dto 맵핑용
+     * @param entity
+     * @return
+     */
+    private MenuDto mapMenu(MenuEntity entity) {
+        if (entity == null) return null;
+        return modelMapper.map(entity, MenuDto.class);
+    }
 
 }

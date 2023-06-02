@@ -5,6 +5,7 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public abstract class DefaultDateEntity implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -7080461491952563362L;
 
 	/**

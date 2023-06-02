@@ -1,9 +1,11 @@
 package com.hhs.codeboard.blog.data.entity.common.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
-@Data
+@Getter
+@Setter
 public class DefaultDto extends DefaultDateDto{
 
     private Integer seq;

@@ -1,7 +1,7 @@
 package com.hhs.codeboard.blog.web.controller.pub;
 
-import com.hhs.codeboard.blog.data.entity.board.dto.request.BoardArticleRequest;
-import com.hhs.codeboard.blog.data.entity.board.dto.response.BoardArticleResponse;
+import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleDto;
+import com.hhs.codeboard.blog.enumeration.YN;
 import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +27,9 @@ public class ArticleController {
      * @return
      */
     @GetMapping("/findAll")
-    public ResponseEntity<List<BoardArticleResponse>> find(BoardArticleRequest boardArticleRequest) {
+    public ResponseEntity<List<BoardArticleDto>> find(BoardArticleDto boardArticleRequest) {
         // 외부 요청은 무조건 공개데이터만 노출
-        boardArticleRequest.setPublicFlag("Y");
+        boardArticleRequest.setPublicFlag(YN.Y);
         return ResponseEntity.ok(articleService.selectArticleList(boardArticleRequest));
     }
 
@@ -39,7 +39,7 @@ public class ArticleController {
 //     * @return
 //     */
 //    @GetMapping("/find/{articleSeq}")
-//    public ResponseEntity<BoardArticleResponse> findOne(@PathVariable(value = "articleSeq") Long articleSeq) {
+//    public ResponseEntity<BoardArticleDto> findOne(@PathVariable(value = "articleSeq") Long articleSeq) {
 //        boardArticleRequest.setPublicFlag("Y");
 //        return ResponseEntity.ok(articleService.selectArticle(articleSeq));
 //    }

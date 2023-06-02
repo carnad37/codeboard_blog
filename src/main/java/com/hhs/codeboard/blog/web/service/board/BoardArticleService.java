@@ -1,25 +1,22 @@
 package com.hhs.codeboard.blog.web.service.board;
 
 import com.hhs.codeboard.blog.config.except.CodeboardException;
+import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleEntity;
 import com.hhs.codeboard.blog.enumeration.ErrorType;
-import com.hhs.codeboard.blog.data.entity.board.dto.request.BoardArticleRequest;
-import com.hhs.codeboard.blog.data.entity.board.dto.response.BoardArticleResponse;
+import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleDto;
 import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleEntity;
 import com.hhs.codeboard.blog.data.repository.ArticleDAO;
 import com.hhs.codeboard.blog.data.repository.MenuDAO;
-import com.hhs.codeboard.blog.util.service.SearchUtil;
-import jakarta.persistence.criteria.Predicate;
+import com.hhs.codeboard.blog.enumeration.YN;
+import com.hhs.codeboard.blog.util.service.QuerySupportUtil;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Transactional
@@ -30,8 +27,10 @@ public class BoardArticleService {
     private final ArticleDAO articleDAO;
     private final MenuDAO menuDAO;
     private final ModelMapper modelMapper;
+    private final JPAQueryFactory jpaQueryFactory;
+    private final QuerySupportUtil queryUtil;
 
-    private final SearchUtil searchUtil;
+    private final QBoardArticleEntity article = QBoardArticleEntity.boardArticleEntity;
 
     /**
      * 게시물 저장
@@ -39,7 +38,7 @@ public class BoardArticleService {
      * @param request
      * @return
      */
-    public BoardArticleResponse saveArticle(BoardArticleRequest request) {
+    public BoardArticleDto saveArticle(BoardArticleDto request) {
         // boardSeq
         BoardArticleEntity entity = articleDAO.findBySeqAndRegUserSeq(request.getSeq(), 1)
                 .orElseGet(()->{
@@ -63,52 +62,36 @@ public class BoardArticleService {
         return mapBoardArticle(entity);
     }
 
-    public BoardArticleResponse selectArticle(@NotNull Long articleSeq, boolean publicFlag) throws CodeboardException {
+    public BoardArticleDto selectArticle(@NotNull Long articleSeq, boolean publicFlag) throws CodeboardException {
         return mapBoardArticle(articleDAO.findById(articleSeq).orElseThrow(ErrorType.NOT_FOUND_DATA::supply));
     }
 
 
-    public BoardArticleResponse selectArticle(@NotNull Long articleSeq) throws CodeboardException {
+    public BoardArticleDto selectArticle(@NotNull Long articleSeq) throws CodeboardException {
         return mapBoardArticle(articleDAO.findById(articleSeq).orElseThrow(ErrorType.NOT_FOUND_DATA::supply));
     }
 
     /**
      * 게시물 검색 쿼리
      * 디폴트로
-     * @param boardArticleRequest
+     * @param articleRequest
      * @return
      */
-    public List<BoardArticleResponse> selectArticleList(BoardArticleRequest boardArticleRequest) {
-        Specification<BoardArticleEntity> select = searchUtil.findSpecification((root, cb) -> {
-            List<Predicate> predicateList = new ArrayList<>();
-            if (StringUtils.hasText(boardArticleRequest.getTitle())) {
-                predicateList.add(cb.like(root.get("title"), "%" +boardArticleRequest.getTitle() + "%"));
-            }
-            if (StringUtils.hasText(boardArticleRequest.getSummary())) {
-                predicateList.add(cb.like(root.get("summary"), "%" + boardArticleRequest.getSummary() + "%"));
-            }
-            if (StringUtils.hasText(boardArticleRequest.getContent())) {
-                predicateList.add(cb.like(root.get("content"), "%" +boardArticleRequest.getContent() + "%"));
-            }
-            if (boardArticleRequest.getSearchStartDate() != null) {
-                predicateList.add(cb.greaterThanOrEqualTo(root.get("regDate").as(LocalDate.class), boardArticleRequest.getSearchStartDate()));
-            }
-            if (boardArticleRequest.getSearchEndDate() != null) {
-                predicateList.add(cb.lessThanOrEqualTo(root.get("regDate").as(LocalDate.class), boardArticleRequest.getSearchEndDate()));
-            }
-            if (boardArticleRequest.getCategorySeq() != null && boardArticleRequest.getCategorySeq() > 0) {
-                predicateList.add(cb.equal(root.get("categorySeq"), boardArticleRequest.getCategorySeq()));
-            }
-            if (boardArticleRequest.getCategorySeq() != null && boardArticleRequest.getBoardSeq() > 0) {
-                predicateList.add(cb.equal(root.get("boardSeq"), boardArticleRequest.getBoardSeq()));
-            }
-            predicateList.add(cb.equal(root.get("publicFlag"), boardArticleRequest.getPublicFlag()));
-            return predicateList;
-        },
-        (root, cb, query)->{
-            query.orderBy(cb.desc(root.get("regDate")));
-        });
-        return articleDAO.findAll(select).stream().map(this::mapBoardArticle).toList();
+    public List<BoardArticleDto> selectArticleList(BoardArticleDto articleRequest) {
+        List<BoardArticleEntity> result = jpaQueryFactory.selectFrom(article)
+            .where(
+                queryUtil.string(articleRequest.getTitle(), article.title::contains),
+                queryUtil.string(articleRequest.getSummary(), article.summary::contains),
+                queryUtil.string(articleRequest.getContent(), article.content::contains),
+                queryUtil.date(articleRequest.getSearchStartDate(), time->article.regDate.goe(LocalDateTime.from(time))),
+                queryUtil.date(articleRequest.getSearchEndDate(), time->article.regDate.loe(LocalDateTime.from(time))),
+                queryUtil.integer(articleRequest.getCategorySeq(), article.categorySeq::eq),
+                queryUtil.integer(articleRequest.getBoardSeq(), article.boardSeq::eq),
+                article.publicFlag.eq(YN.N)
+            ).orderBy(article.regDate.desc())
+            .fetch();
+
+        return result.stream().map(this::mapBoardArticle).toList();
     }
 
     /**
@@ -116,9 +99,9 @@ public class BoardArticleService {
      * @param entity
      * @return
      */
-    private BoardArticleResponse mapBoardArticle(BoardArticleEntity entity) {
+    private BoardArticleDto mapBoardArticle(BoardArticleEntity entity) {
         if (entity == null) return null;
-        return modelMapper.map(entity, BoardArticleResponse.class);
+        return modelMapper.map(entity, BoardArticleDto.class);
     }
 
 }

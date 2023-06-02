@@ -17,8 +17,8 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/private/article")
-public class PrivateArticleController {
+@RequestMapping("/private/board")
+public class PrivateBoardController {
 
     private final BoardArticleService articleService;
 
@@ -28,7 +28,7 @@ public class PrivateArticleController {
      * @return
      */
     @GetMapping("/find")
-    public ResponseEntity<List<BoardArticleDto>> find(BoardArticleDto request) {
+    public ResponseEntity<List<BoardArticleDto>> find(@RequestBody BoardArticleDto request) {
         return ResponseEntity.ok(articleService.selectArticleList(request));
     }
 

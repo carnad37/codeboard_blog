@@ -1,6 +1,7 @@
 package com.hhs.codeboard.blog.config.security;
 
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
+import com.hhs.codeboard.blog.web.service.member.MemberService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,27 +19,25 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JWTLoginFilter extends OncePerRequestFilter {
 
-    private final WebClient webClient;
-
-    @Value("${codeboard.module.member.url}")
-    private String memberUrl;
+    private final MemberService memberService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userToken = request.getParameter("token");
         String userSeq = request.getParameter("userSeq");
-        if (!StringUtils.hasText(userToken) || !StringUtils.hasText(userSeq)) return;
-
-        // 유저정보 얻기
-        String memberUrl = this.memberUrl + "/public/login&token=%s".formatted(userToken, userSeq);
-        MemberDto memberInfo = webClient.get()
-                .uri(memberUrl)
-                .retrieve()
-                .bodyToMono(MemberDto.class)
-                .block();
-        UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberInfo, userToken);
-        SecurityContextHolder.getContext().setAuthentication(user);
-
+        if (StringUtils.hasText(userToken) && StringUtils.hasText(userSeq)) {
+            // 유저정보 얻기
+            MemberDto memberInfo = memberService.authorized(userToken);
+            UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberInfo, userToken);
+            SecurityContextHolder.getContext().setAuthentication(user);
+        } else {
+            MemberDto memberDto = new MemberDto();
+            memberDto.setEmail("test@test.co.kr");
+            memberDto.setUserSeq(1);
+            UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberDto, userToken);
+            SecurityContextHolder.getContext().setAuthentication(user);
+        }
+        filterChain.doFilter(request, response);
     }
 
 
