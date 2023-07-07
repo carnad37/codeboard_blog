@@ -15,7 +15,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public MemberDto authorized(String token) {
 		return memberClient.get()
-				.uri("/public/login&token=%s".formatted(token))
+				.uri("/public/user/login&token=%s".formatted(token))
 				.retrieve()
 				.bodyToMono(com.hhs.codeboard.blog.data.entity.member.dto.MemberDto.class)
 				.block();
