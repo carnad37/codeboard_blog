@@ -14,6 +14,6 @@ public class BoardCategoryDto {
 
     private YN useF;
 
-    private Integer boardSeq;
+    private Long boardSeq;
 
 }

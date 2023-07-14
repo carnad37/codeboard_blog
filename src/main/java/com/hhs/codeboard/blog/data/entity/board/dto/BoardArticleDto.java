@@ -20,8 +20,8 @@ public class BoardArticleDto implements Serializable {
     private String content;
     private String summary;
     private YN publicFlag;
-    private Integer boardSeq;
-    private Integer categorySeq;
+    private Long boardSeq;
+    private Long categorySeq;
 
     @JsonIgnore
     private LocalDate searchStartDate;

@@ -36,13 +36,13 @@ public class BoardArticleEntity extends DefaultEntity{
     private YN publicFlag;
     
     @Column
-    private Integer boardSeq;
+    private Long boardSeq;
 
     @Column
-    private Integer categorySeq;
+    private Long categorySeq;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name="articleSeq")
-    private Collection<BoardCateArticleEntity> categorys;
+//    @OneToMany(fetch = FetchType.LAZY)
+//    @JoinColumn(name="articleSeq")
+//    private Collection<BoardCateArticleEntity> categorys;
 
 }

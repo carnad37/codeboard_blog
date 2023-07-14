@@ -4,13 +4,13 @@ public enum MenuSeqEnum {
 
     STATIC_MENU(-1), ROOT_MENU(0);
 
-    private int menuSeq;
+    private long menuSeq;
 
-    MenuSeqEnum (int menuSeq) {
+    MenuSeqEnum (long menuSeq) {
         this.menuSeq = menuSeq;
     }
 
-    public int getMenuSeq() {
+    public long getMenuSeq() {
         return this.menuSeq;
     }
     

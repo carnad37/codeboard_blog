@@ -19,7 +19,7 @@ public class MemberDto extends DefaultDateDto {
 
     private String userType;
 
-    private Integer userSeq;
+    private Long userSeq;
 
 //    private Collection<MenuEntity> menuList;
 

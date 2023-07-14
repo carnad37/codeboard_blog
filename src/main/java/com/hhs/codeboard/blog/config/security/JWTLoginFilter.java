@@ -21,21 +21,31 @@ public class JWTLoginFilter extends OncePerRequestFilter {
 
     private final MemberService memberService;
 
+    private final String authorizedHeaderEmailName = "X-USER-INFO";
+    private final String authorizedHeaderSeqName = "X-USER-SEQ";
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String userToken = request.getParameter("token");
-        String userSeq = request.getParameter("userSeq");
-        if (StringUtils.hasText(userToken) && StringUtils.hasText(userSeq)) {
+        /**
+         *  TODO :: 차후에 헤더에 파라미터로 인증 타입정보 같이 넘겨주고, 타입에 맞는 인증과정 필요
+         *  공통 라이브러리로 만들면 편해보임
+         *  현재는 Email식으로 고정
+         */
+        String email = request.getHeader(authorizedHeaderEmailName);
+        String userSeq = request.getHeader(authorizedHeaderSeqName);
+
+        if (StringUtils.hasText(email)) {
             // 유저정보 얻기
-            MemberDto memberInfo = memberService.authorized(userToken);
-            UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberInfo, userToken);
-            SecurityContextHolder.getContext().setAuthentication(user);
-        } else {
-            MemberDto memberDto = new MemberDto();
-            memberDto.setEmail("test@test.co.kr");
-            memberDto.setUserSeq(1);
-            UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberDto, userToken);
-            SecurityContextHolder.getContext().setAuthentication(user);
+            try {
+                MemberDto memberInfo = memberService.authorized(email);
+                MemberDto memberDto = new MemberDto();
+                memberDto.setEmail(email);
+                memberDto.setUserSeq(Long.parseLong(userSeq));
+                UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberDto, null);
+                SecurityContextHolder.getContext().setAuthentication(user);
+            } catch (NumberFormatException ne) {
+                // 이상데이터는 그냥 넘겨버림
+            }
         }
         filterChain.doFilter(request, response);
     }

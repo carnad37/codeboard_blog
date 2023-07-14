@@ -1,11 +1,14 @@
 package com.hhs.codeboard.blog.web.controller.prv;
 
+import com.hhs.codeboard.blog.data.entity.common.dto.CommonResponse;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
 import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,15 +30,12 @@ public class PrivateMenuController {
     private final MenuService menuService;
 
     @PostMapping("/save")
-    public ResponseEntity<String> addMenu(@RequestBody MenuDto request) throws Exception {
-
-        // FIXME :: 테스트를 위한 회원 설정
+    public ResponseEntity<CommonResponse<Void>> addMenu(@RequestBody MenuDto request, @AuthenticationPrincipal MemberDto dto) throws Exception {
         MemberDto memberDto = new MemberDto();
-        memberDto.setUserSeq(1);
-        memberDto.setEmail("test@test.co.kr");
         menuService.insertMenu(request, memberDto);
 
-        return ResponseEntity.ok("success");
+        CommonResponse<Void> response = new CommonResponse<>(HttpStatus.OK.value(), null, "success", false);
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -44,7 +44,7 @@ public class BoardArticleService {
                 .orElseGet(()->{
                     BoardArticleEntity supEntity = new BoardArticleEntity();
                     supEntity.setRegDate(LocalDateTime.now());
-                    supEntity.setRegUserSeq(1);
+                    supEntity.setRegUserSeq(1L);
                     return supEntity;
                 });
 
@@ -56,7 +56,7 @@ public class BoardArticleService {
         entity.setContent(request.getContent());
         entity.setPublicFlag(request.getPublicFlag());
         entity.setModDate(LocalDateTime.now());
-        entity.setModUserSeq(1);
+        entity.setModUserSeq(1L);
         //entity.setCategorys(request.getCategorySeq());
         articleDAO.save(entity);
         return mapBoardArticle(entity);
@@ -80,13 +80,13 @@ public class BoardArticleService {
     public List<BoardArticleDto> selectArticleList(BoardArticleDto articleRequest) {
         List<BoardArticleEntity> result = jpaQueryFactory.selectFrom(article)
             .where(
-                queryUtil.string(articleRequest.getTitle(), article.title::contains),
-                queryUtil.string(articleRequest.getSummary(), article.summary::contains),
-                queryUtil.string(articleRequest.getContent(), article.content::contains),
-                queryUtil.date(articleRequest.getSearchStartDate(), time->article.regDate.goe(LocalDateTime.from(time))),
-                queryUtil.date(articleRequest.getSearchEndDate(), time->article.regDate.loe(LocalDateTime.from(time))),
-                queryUtil.integer(articleRequest.getCategorySeq(), article.categorySeq::eq),
-                queryUtil.integer(articleRequest.getBoardSeq(), article.boardSeq::eq),
+                queryUtil.toString(articleRequest.getTitle(), article.title::contains),
+                queryUtil.toString(articleRequest.getSummary(), article.summary::contains),
+                queryUtil.toString(articleRequest.getContent(), article.content::contains),
+                queryUtil.toDate(articleRequest.getSearchStartDate(), time->article.regDate.goe(LocalDateTime.from(time))),
+                queryUtil.toDate(articleRequest.getSearchEndDate(), time->article.regDate.loe(LocalDateTime.from(time))),
+                queryUtil.toLong(articleRequest.getCategorySeq(), article.categorySeq::eq),
+                queryUtil.toLong(articleRequest.getBoardSeq(), article.boardSeq::eq),
                 article.publicFlag.eq(YN.N)
             ).orderBy(article.regDate.desc())
             .fetch();

@@ -46,7 +46,7 @@ public class MenuEntity extends DefaultEntity {
     private MenuTypeEnum menuType;
 
     @Column
-    private Integer parentSeq;
+    private Long parentSeq;
 
     @Column
     private YN publicFlag;

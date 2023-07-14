@@ -25,7 +25,7 @@ public class SecurityUtil {
         return (MemberDto) getSecurityContextHolder().getPrincipal();
     }
 
-    public int getUserSeq() {
+    public long getUserSeq() {
         return this.isLogin() ? ((MemberDto) getSecurityContextHolder().getPrincipal()).getUserSeq() : -1;
     }
 

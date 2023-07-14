@@ -19,7 +19,7 @@ public class MenuDto extends DefaultSearchDto {
 
     private Integer menuOrder;
 
-    private Integer parentSeq;
+    private Long parentSeq;
 
     private String uuid;
 

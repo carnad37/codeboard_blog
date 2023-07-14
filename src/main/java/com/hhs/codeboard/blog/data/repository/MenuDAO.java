@@ -13,12 +13,12 @@ public interface MenuDAO extends JpaRepository<MenuEntity, Long> {
 
 //    Optional<MenuEntity> findByUuidAndRegUserSeqAndDelDateIsNull(String uuid, Integer regUserSeq);
 
-    List<MenuEntity> findAllByRegUserSeqAndDelDateIsNull(Integer regUserSeq, Sort sort);
+    List<MenuEntity> findAllByRegUserSeqAndDelDateIsNull(Long regUserSeq, Sort sort);
 
-    List<MenuEntity> findAllByRegUserSeqAndDelDateIsNull(Integer regUserSeq);
+    List<MenuEntity> findAllByRegUserSeqAndDelDateIsNull(Long regUserSeq);
 
-    List<MenuEntity> findAllByRegUserSeqAndMenuTypeAndDelDateIsNull(Integer regUserSeq, String menuType);
+    List<MenuEntity> findAllByRegUserSeqAndMenuTypeAndDelDateIsNull(Long regUserSeq, String menuType);
 
-    List<MenuEntity> findAllByParentSeqAndDelDateIsNull(Integer parentSeq);
+    List<MenuEntity> findAllByParentSeqAndDelDateIsNull(Long parentSeq);
 
 }

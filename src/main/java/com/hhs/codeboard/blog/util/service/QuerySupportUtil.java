@@ -13,24 +13,28 @@ import org.springframework.util.StringUtils;
 import java.time.temporal.TemporalAccessor;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.LongFunction;
 import java.util.function.LongSupplier;
 
 @Component
 public class QuerySupportUtil {
 
-    public BooleanExpression string(String target , Function<String, BooleanExpression> func) {
+    public BooleanExpression toString(String target , Function<String, BooleanExpression> func) {
         return StringUtils.hasText(target) ? func.apply(target) : null;
     }
 
-    public <T extends TemporalAccessor> BooleanExpression date(T target , Function<T, BooleanExpression> func) {
+    public <T extends TemporalAccessor> BooleanExpression toDate(T target , Function<T, BooleanExpression> func) {
         return target != null ? func.apply(target) : null;
     }
 
-    public BooleanExpression integer(Integer target , IntFunction<BooleanExpression> func) {
+    public BooleanExpression toInteger(Integer target , IntFunction<BooleanExpression> func) {
+        return target != null && target > 0 ? func.apply(target) : null;
+    }
+    public BooleanExpression toLong(Long target , LongFunction<BooleanExpression> func) {
         return target != null && target > 0 ? func.apply(target) : null;
     }
 
-    public BooleanExpression object(Object target , Function<Object, BooleanExpression> func) {
+    public BooleanExpression toObject(Object target , Function<Object, BooleanExpression> func) {
         return target != null ? func.apply(target) : null;
     }
 

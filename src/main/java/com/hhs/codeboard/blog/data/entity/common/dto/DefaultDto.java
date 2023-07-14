@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 public class DefaultDto extends DefaultDateDto{
 
-    private Integer seq;
+    private Long seq;
 
-    private Integer regUserSeq;
+    private Long regUserSeq;
 
-    private Integer modUserSeq;
+    private Long modUserSeq;
 
 }

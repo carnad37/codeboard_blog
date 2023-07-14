@@ -40,7 +40,7 @@ public class MenuService {
 
     private final QMenuEntity menu = QMenuEntity.menuEntity;
 
-    public List<MenuEntity> selectAllBoardMenu(int regUserSeq) {
+    public List<MenuEntity> selectAllBoardMenu(long regUserSeq) {
         List<MenuEntity> resultList = new ArrayList<>();
         List<MenuEntity> menuList = menuDAO.findAllByRegUserSeqAndDelDateIsNull(regUserSeq, Sort.by(Sort.Direction.DESC, "menuOrder"));
 //        menuList.forEach(
@@ -49,7 +49,7 @@ public class MenuService {
         return resultList;
     }
 
-    public List<MenuEntity> selectMenuList(int regUserSeq, MenuTypeEnum menuType) {
+    public List<MenuEntity> selectMenuList(long regUserSeq, MenuTypeEnum menuType) {
         List<MenuEntity> menuList = menuDAO.findAllByRegUserSeqAndMenuTypeAndDelDateIsNull(regUserSeq, menuType.getMenuType());
         return menuList;
     }
@@ -200,20 +200,20 @@ public class MenuService {
 
         //공통 설정
         MenuDto setMenu = new MenuDto();
-        setMenu.setSeq(0);
+        setMenu.setSeq(0L);
         setMenu.setTitle("공통메뉴");
         setMenu.setMenuType(MenuTypeEnum.STATIC_MENU);
         constMenuVO.setMenu(setMenu);
 
         //공통게시판 내용추가
         setMenu = new MenuDto();
-        setMenu.setSeq(0);
+        setMenu.setSeq(0L);
         setMenu.setTitle("게시판 목록");
         setMenu.setMenuType(MenuTypeEnum.BOARD_CONFIG);
         setInnerList.add(new MenuVO(setMenu));
 
         setMenu = new MenuDto();
-        setMenu.setSeq(0);
+        setMenu.setSeq(0L);
         setMenu.setTitle("메뉴 목록");
         setMenu.setMenuType(MenuTypeEnum.MENU_CONFIG);
         setInnerList.add(new MenuVO(setMenu));
@@ -223,7 +223,7 @@ public class MenuService {
         menuList.add(constMenuVO);
 
         //메뉴 맵 UUID::VO
-        Map<Integer, MenuVO> menuMap = new HashMap<>();
+        Map<Long, MenuVO> menuMap = new HashMap<>();
         List<MenuVO> addTopList = new ArrayList<>();
 
         //부모자식 구분하기
@@ -312,7 +312,7 @@ public class MenuService {
         return null;
     }
 
-    private void checkParentMenu(int parentSeq) throws RuntimeException {
+    private void checkParentMenu(long parentSeq) throws RuntimeException {
         // 메뉴수정을 위해 상위메뉴 정보를 체크하는 기능이므로 반드시 로그인 여부가 필요.
         // parentSeq 체크, 없으면 exception
         MenuDto menuDto = new MenuDto();
@@ -323,8 +323,8 @@ public class MenuService {
 
     private Predicate[] getDefaultCondition(MenuDto menuDto) {
         return new Predicate[]{
-                queryUtil.integer(menuDto.getSeq(), menu.seq::eq),
-                queryUtil.integer(menuDto.getRegUserSeq(), menu.regUserSeq::eq),
+                queryUtil.toLong(menuDto.getSeq(), menu.seq::eq),
+                queryUtil.toLong(menuDto.getRegUserSeq(), menu.regUserSeq::eq),
                 menuDto.getPublicFlag() != null ? menu.publicFlag.eq(menuDto.getPublicFlag()) : null,
                 menu.delDate.isNull()
         };

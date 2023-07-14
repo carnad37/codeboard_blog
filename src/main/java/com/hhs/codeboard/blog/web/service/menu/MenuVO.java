@@ -42,11 +42,11 @@ public class MenuVO implements Serializable {
         this.menu.setTitle(title);
     }
 
-    public Integer getSeq() {
+    public Long getSeq() {
         return this.menu.getSeq();
     }
 
-    public void setSeq(Integer seq) {
+    public void setSeq(Long seq) {
         this.menu.setSeq(seq);
     }
 
@@ -74,11 +74,11 @@ public class MenuVO implements Serializable {
         this.menu.setMenuOrder(menuOrder);
     }
 
-    public Integer getParentSeq() {
+    public Long getParentSeq() {
         return this.menu.getParentSeq();
     }
 
-    public void setParentSeq(Integer parentSeq) {
+    public void setParentSeq(Long parentSeq) {
         this.menu.setParentSeq(parentSeq);
     }
 

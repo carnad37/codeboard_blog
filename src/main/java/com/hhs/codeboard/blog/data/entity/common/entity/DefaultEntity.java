@@ -19,12 +19,12 @@ public abstract class DefaultEntity extends DefaultDateEntity {
 	@Id
 	@Column
 	@GeneratedValue(strategy= GenerationType.TABLE, generator = CommonStaticProperty.SEQUENCE_TABLE_GENERATOR)
-	private Integer seq;
+	private Long seq;
 
 	@Column
-	private Integer regUserSeq;
+	private Long regUserSeq;
 
 	@Column
-	private Integer modUserSeq;
+	private Long modUserSeq;
 
 }
