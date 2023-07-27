@@ -2,6 +2,7 @@ package com.hhs.codeboard.blog.config.security;
 
 import com.hhs.codeboard.blog.web.service.member.MemberService;
 import com.hhs.codeboard.blog.web.service.member.impl.MemberServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -20,9 +21,11 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-@DependsOn("webClient")
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
+
+    private final MemberService memberService;
 
     @Bean
     public WebSecurityCustomizer configure() {
@@ -33,48 +36,25 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    protected SecurityFilterChain filter(WebClient webClient, HttpSecurity http) throws Exception {
+    protected SecurityFilterChain filter(HttpSecurity http) throws Exception {
 
         //공통 사용
-        AuthenticationSuccessHandler successHandler = loginSuccessHandler();
-
-        http.authorizeRequests()
+        http.authorizeHttpRequests()
             .requestMatchers("/public/**").permitAll()
+//            .requestMatchers("/private/**").permitAll()
             .requestMatchers("/private/**").authenticated()
-            .anyRequest().denyAll()
+//            .anyRequest().denyAll()
             .and()
             .httpBasic().disable()
             .formLogin().disable()
-//                .cors().disable()
-//                .csrf().disable()
+                .cors().disable()
+                .csrf().disable()
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .sessionFixation().none()
+//            .sessionFixation().none()
             .and()
-            .addFilterBefore(new JWTLoginFilter(webClient), UsernamePasswordAuthenticationFilter.class)
-//            .and()
-//            .exceptionHandling()
-//        	.accessDeniedHandler("/denied")
-//            .and()
-//                .rememberMe().key("dontReadKey")
-//                .userDetailsService(memberService())
-//                .authenticationSuccessHandler(successHandler);
-            ;
+            .addFilterBefore(new JWTLoginFilter(memberService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-
-    /**
-     * 따로 해당 클래스에서 Component나 Service로 등록하지않고
-     * 일괄적으로 Bean 등록
-     */
-    @Bean
-    public MemberService memberService() {
-        return new MemberServiceImpl();
-    }
-
-    @Bean
-    public LogoutHandler logoutSuccessHandler() {
-        return new LogoutSuccessHandler();
     }
 
     @Bean
@@ -82,20 +62,4 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationFailureHandler loginFailureHandler() {
-        return new LoginFailureHandler();
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        return new AuthenticationProviderImpl();
-    }
-
-    @Bean
-    public AuthenticationSuccessHandler loginSuccessHandler() {
-        return new LoginSuccessHandler();
-    }
-
-    
 }

@@ -1,6 +1,8 @@
 package com.hhs.codeboard.blog.web.service.menu;
 
-import com.hhs.codeboard.blog.jpa.entity.menu.dto.MenuDto;
+import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
+import com.hhs.codeboard.blog.enumeration.MenuTypeEnum;
+import com.hhs.codeboard.blog.enumeration.YN;
 
 import java.io.Serializable;
 import java.util.List;
@@ -40,11 +42,11 @@ public class MenuVO implements Serializable {
         this.menu.setTitle(title);
     }
 
-    public Integer getSeq() {
+    public Long getSeq() {
         return this.menu.getSeq();
     }
 
-    public void setSeq(Integer seq) {
+    public void setSeq(Long seq) {
         this.menu.setSeq(seq);
     }
 
@@ -72,20 +74,20 @@ public class MenuVO implements Serializable {
         this.menu.setMenuOrder(menuOrder);
     }
 
-    public Integer getParentSeq() {
+    public Long getParentSeq() {
         return this.menu.getParentSeq();
     }
 
-    public void setParentSeq(Integer parentSeq) {
+    public void setParentSeq(Long parentSeq) {
         this.menu.setParentSeq(parentSeq);
     }
 
-    public String getPublicF() {
-        return this.menu.getPublicF();
+    public YN getPublicF() {
+        return this.menu.getPublicFlag();
     }
 
-    public void setPublicF(String publicF) {
-        this.menu.setPublicF(publicF);
+    public void setPublicF(YN publicF) {
+        this.menu.setPublicFlag(publicF);
     }
 
     public String getUuid() {
@@ -96,11 +98,11 @@ public class MenuVO implements Serializable {
         this.menu.setUuid(uuid);
     }
 
-    public String getMenuType() {
+    public MenuTypeEnum getMenuType() {
         return this.menu.getMenuType();
     }
 
-    public void setMenuType(String menuType) {
+    public void setMenuType(MenuTypeEnum menuType) {
         this.menu.setMenuType(menuType);
     }
 

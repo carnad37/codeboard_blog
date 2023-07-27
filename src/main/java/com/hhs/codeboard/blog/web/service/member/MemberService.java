@@ -1,9 +1,9 @@
 package com.hhs.codeboard.blog.web.service.member;
 
+import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.hhs.codeboard.blog.jpa.entity.member.entity.MemberEntity;
+public interface MemberService {
 
-public interface MemberService extends UserDetailsService {
-	String insertUser(MemberEntity memberVO);
+	MemberDto authorized(String token);
 }
