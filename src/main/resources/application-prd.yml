@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+#spring:
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    username: postgres
+# spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+#    password: test01#
+spring:
+  datasource:
+    url: jdbc:mariadb://codeboard-blog-db:3306/codeboard_blog
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: testdb#
+
+codeboard:
+  member: http://codeboard-member
+
