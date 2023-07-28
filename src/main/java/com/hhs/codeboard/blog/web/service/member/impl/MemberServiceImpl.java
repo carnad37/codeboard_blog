@@ -11,11 +11,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class MemberServiceImpl implements MemberService {
 
 	private final WebClient memberClient;
+	private final String authorizedHeaderEmailName = "X-USER-INFO";
 
 	@Override
-	public MemberDto authorized(String token) {
+	public MemberDto getSelfInfo(String email) {
+
 		return memberClient.get()
-				.uri("/public/user/login&token=%s".formatted(token))
+				.uri("/private/user/selfInfo")
+				.header(authorizedHeaderEmailName, email)
 				.retrieve()
 				.bodyToMono(com.hhs.codeboard.blog.data.entity.member.dto.MemberDto.class)
 				.block();

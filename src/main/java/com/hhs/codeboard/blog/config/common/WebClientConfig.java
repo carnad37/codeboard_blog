@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfig {
 
-    @Value("{codeboard.member}")
+    @Value("${codeboard.member}")
     private String memberUrl;
 
     @Bean

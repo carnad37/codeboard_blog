@@ -7,12 +7,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 
@@ -22,7 +20,6 @@ public class JWTLoginFilter extends OncePerRequestFilter {
     private final MemberService memberService;
 
     private final String authorizedHeaderEmailName = "X-USER-INFO";
-    private final String authorizedHeaderSeqName = "X-USER-SEQ";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,19 +29,19 @@ public class JWTLoginFilter extends OncePerRequestFilter {
          *  현재는 Email식으로 고정
          */
         String email = request.getHeader(authorizedHeaderEmailName);
-        String userSeq = request.getHeader(authorizedHeaderSeqName);
 
         if (StringUtils.hasText(email)) {
             // 유저정보 얻기
             try {
-                MemberDto memberInfo = memberService.authorized(email);
                 MemberDto memberDto = new MemberDto();
+
+                MemberDto memberInfo = memberService.getSelfInfo(email);
                 memberDto.setEmail(email);
-                memberDto.setUserSeq(Long.parseLong(userSeq));
+                memberDto.setUserSeq(memberInfo.getUserSeq());
                 UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberDto, null);
                 SecurityContextHolder.getContext().setAuthentication(user);
             } catch (NumberFormatException ne) {
-                // 이상데이터는 그냥 넘겨버림
+                // 이상데이터는 그냥 넘겨버림 (인증안함)
             }
         }
         filterChain.doFilter(request, response);
