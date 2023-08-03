@@ -1,9 +1,10 @@
 package com.hhs.codeboard.blog.util.common;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.experimental.UtilityClass;
 import org.springframework.stereotype.Component;
 
-@Component
+@UtilityClass
 public class SessionUtil {
 
     public static void setSession (HttpServletRequest request, String key, Object value) {

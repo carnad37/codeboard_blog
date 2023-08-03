@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/private/menu")
@@ -30,12 +27,16 @@ public class PrivateMenuController {
     private final MenuService menuService;
 
     @PostMapping("/save")
-    public ResponseEntity<CommonResponse<Void>> addMenu(@RequestBody MenuDto request, @AuthenticationPrincipal MemberDto dto) throws Exception {
-        MemberDto memberDto = new MemberDto();
-        menuService.insertMenu(request, memberDto);
-
-        CommonResponse<Void> response = new CommonResponse<>(HttpStatus.OK.value(), null, "success", false);
+    public ResponseEntity<CommonResponse<MenuDto>> saveMenu(@RequestBody MenuDto request) throws Exception {
+        MenuDto menuDto = menuService.insertMenu(request);
+        CommonResponse<MenuDto> response = new CommonResponse<>(menuDto);
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/save")
+    public ResponseEntity<CommonResponse<Void>> updateMenu(@RequestBody MenuDto request) throws Exception {
+        menuService.updateMenu(request);
+        CommonResponse<Void> response = new CommonResponse<>(HttpStatus.OK.value(), null, "success", false);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -27,14 +27,13 @@ public class CategoryService {
     private final MenuDAO menuDAO;
     private final ArticleDAO articleDAO;
     private final MenuService menuService;
-    private final SecurityUtil securityUtil;
 
     public int insertCategory(BoardCategoryDto cateVO, MemberDto memberDto) {
         /*
             먼저 해당 게시판에대해 유저의 권한을 확인한다.
          */
         MenuDto selectMenu = new MenuDto();
-        selectMenu.setRegUserSeq(securityUtil.getUserSeq());
+        selectMenu.setRegUserSeq(SecurityUtil.getUserSeq());
         selectMenu.setSeq(cateVO.getBoardSeq());
         if (!menuService.existMenu(selectMenu)) throw new RuntimeException("잘못된 접근입니다.");
 
@@ -54,7 +53,7 @@ public class CategoryService {
             해당 카테고리 번호를 가진 boardArticle역시 모두 null로 초기화한다.
          */
         MenuDto selectMenu = new MenuDto();
-        selectMenu.setRegUserSeq(securityUtil.getUserSeq());
+        selectMenu.setRegUserSeq(SecurityUtil.getUserSeq());
         selectMenu.setSeq(cateVO.getBoardSeq());
         if (!menuService.existMenu(selectMenu)) throw new RuntimeException("잘못된 접근입니다.");
 

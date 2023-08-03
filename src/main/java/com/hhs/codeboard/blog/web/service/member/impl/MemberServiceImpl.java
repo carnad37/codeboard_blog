@@ -20,7 +20,7 @@ public class MemberServiceImpl implements MemberService {
 				.uri("/private/user/selfInfo")
 				.header(authorizedHeaderEmailName, email)
 				.retrieve()
-				.bodyToMono(com.hhs.codeboard.blog.data.entity.member.dto.MemberDto.class)
+				.bodyToMono(MemberDto.class)
 				.block();
 	}
 }

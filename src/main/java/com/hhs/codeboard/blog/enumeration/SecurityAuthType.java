@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Getter
-public enum SecurityAuthType {
+public enum SecurityAuthType implements CodeboardEnum {
 
     PRE_MEMBER("임시회원", "P")
     , NORMAL("일반회원", "N")

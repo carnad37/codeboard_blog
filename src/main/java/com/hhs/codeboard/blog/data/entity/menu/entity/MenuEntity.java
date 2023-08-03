@@ -43,13 +43,13 @@ public class MenuEntity extends DefaultEntity {
     private Integer menuOrder;
 
     @Column
-    private MenuTypeEnum menuType;
+    private String menuType;
 
     @Column
     private Long parentSeq;
 
     @Column
-    private YN publicFlag;
+    private String publicFlag;
 
     @Column
     private String uuid;

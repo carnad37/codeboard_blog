@@ -33,7 +33,7 @@ public class BoardArticleEntity extends DefaultEntity{
     private String summary;
 
     @Column
-    private YN publicFlag;
+    private String publicFlag;
     
     @Column
     private Long boardSeq;

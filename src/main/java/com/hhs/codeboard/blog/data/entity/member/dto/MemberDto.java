@@ -13,9 +13,9 @@ public class MemberDto extends DefaultDateDto {
 
     private String email;
 
-    private String password;
+    private String passwd;
 
-    private String nickName;
+    private String nickname;
 
     private String userType;
 

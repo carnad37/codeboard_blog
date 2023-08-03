@@ -25,7 +25,7 @@ public class BoardCategoryEntity extends DefaultEntity {
     private String title;
 
     @Column
-    private YN useF;
+    private String useFlag;
 
     @Column
     private Long boardSeq;

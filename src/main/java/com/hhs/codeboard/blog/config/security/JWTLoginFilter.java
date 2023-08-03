@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @RequiredArgsConstructor
 public class JWTLoginFilter extends OncePerRequestFilter {
@@ -38,7 +39,9 @@ public class JWTLoginFilter extends OncePerRequestFilter {
                 MemberDto memberInfo = memberService.getSelfInfo(email);
                 memberDto.setEmail(email);
                 memberDto.setUserSeq(memberInfo.getUserSeq());
-                UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberDto, null);
+
+                // TODO :: 차후에 권한설정
+                UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(memberDto, null, Collections.emptyList());
                 SecurityContextHolder.getContext().setAuthentication(user);
             } catch (NumberFormatException ne) {
                 // 이상데이터는 그냥 넘겨버림 (인증안함)

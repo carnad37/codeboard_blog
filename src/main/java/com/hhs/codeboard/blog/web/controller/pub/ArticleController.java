@@ -6,9 +6,7 @@ import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,25 +21,18 @@ public class ArticleController {
 
     /**
      * 게시물 조회
-     * @param boardArticleRequest
-     * @return
      */
     @GetMapping("/findAll")
     public ResponseEntity<List<BoardArticleDto>> find(BoardArticleDto boardArticleRequest) {
-        // 외부 요청은 무조건 공개데이터만 노출
-        boardArticleRequest.setPublicFlag(YN.Y);
         return ResponseEntity.ok(articleService.selectArticleList(boardArticleRequest));
     }
 
-//    /**
-//     * 게시물 단건 조회
-//     * @param articleSeq
-//     * @return
-//     */
-//    @GetMapping("/find/{articleSeq}")
-//    public ResponseEntity<BoardArticleDto> findOne(@PathVariable(value = "articleSeq") Long articleSeq) {
-//        boardArticleRequest.setPublicFlag("Y");
-//        return ResponseEntity.ok(articleService.selectArticle(articleSeq));
-//    }
+    /**
+     * 게시물 단건 조회
+     */
+    @GetMapping("/find/{articleSeq}")
+    public ResponseEntity<BoardArticleDto> findOne(@PathVariable(value = "articleSeq") Long articleSeq) {
+        return ResponseEntity.ok(articleService.selectArticle(articleSeq));
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.hhs.codeboard.blog.web.controller.prv;
 
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleDto;
+import com.hhs.codeboard.blog.data.entity.common.dto.CommonResponse;
 import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,19 +23,11 @@ public class PrivateArticleController {
 
     private final BoardArticleService articleService;
 
-    /**
-     * 게시물 조회
-     * @param request
-     * @return
-     */
-    @GetMapping("/find")
-    public ResponseEntity<List<BoardArticleDto>> find(BoardArticleDto request) {
-        return ResponseEntity.ok(articleService.selectArticleList(request));
-    }
-
     @PostMapping("/save")
-    public ResponseEntity<BoardArticleDto> save(@RequestBody BoardArticleDto request) {
-        return ResponseEntity.ok(articleService.saveArticle(request));
+    public ResponseEntity<CommonResponse<BoardArticleDto>> save(@RequestBody BoardArticleDto request) {
+        BoardArticleDto article = articleService.saveArticle(request);
+        CommonResponse<BoardArticleDto> response = new CommonResponse<>(article);
+        return ResponseEntity.ok(response);
     }
 
 

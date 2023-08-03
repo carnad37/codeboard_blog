@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum YN {
 
-    Y(true)
-    , N(false);
+    Y("Y", true)
+    , N("N", false);
 
+    private final String code;
     private final boolean value;
 
 }
