@@ -12,6 +12,7 @@ import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
 import com.hhs.codeboard.blog.data.repository.MenuDAO;
 import com.hhs.codeboard.blog.enumeration.YN;
 import com.hhs.codeboard.blog.util.common.EnumUtil;
+import com.hhs.codeboard.blog.util.common.FormatUtil;
 import com.hhs.codeboard.blog.util.service.QueryUtil;
 import com.hhs.codeboard.blog.util.service.ResponseUtil;
 import com.hhs.codeboard.blog.util.service.SecurityUtil;
@@ -40,6 +41,7 @@ public class MenuService {
     private final JPAQueryFactory jpaQueryFactory;
 
     private final QMenuEntity menu = QMenuEntity.menuEntity;
+    private final QMenuEntity joinMenu =  new QMenuEntity("joinMenu");;
 
     /**
      * 단일 객체 확인
@@ -70,14 +72,20 @@ public class MenuService {
     /**
      * 전체 메뉴 조회
      * @param menuDto
-     * @param member
      * @return
      * @throws CodeboardException
      */
     public Page<MenuDto> selectAll(MenuDto menuDto) throws CodeboardException {
+        // validate
+        if (!FormatUtil.Number.isPositive(menuDto.getUserSeq())) {
+            throw new CodeboardParameterException("잘못된 요청입니다.");
+        }
+
         Predicate[] wheres = getDefaultConditionToArray(menuDto);
 
         JPAQuery<MenuEntity> resultList = jpaQueryFactory.selectFrom(menu)
+            .leftJoin(menu.childrenList, joinMenu)
+            .fetchJoin()
             .where(wheres);
 
         JPAQuery<Long> totalCnt = jpaQueryFactory.select(menu.count()).from(menu)
@@ -357,7 +365,8 @@ public class MenuService {
     private List<Predicate> getDefaultCondition(MenuDto menuDto) {
         return Arrays.asList(
                 QueryUtil.longNullable(menuDto.getSeq(), menu.seq::eq),
-                QueryUtil.longNullable(menuDto.getRegUserSeq(), menu.regUserSeq::eq),
+                QueryUtil.longNullable(menuDto.getUserSeq(), menu.regUserSeq::eq),
+                QueryUtil.longNullable(menuDto.getParentSeq(), menu.parentSeq::eq),
                 SecurityUtil.isLogin() ?
                     menu.publicFlag.eq(YN.Y.getCode()).or(
                         menu.publicFlag.eq(YN.N.getCode()).and(menu.regUserSeq.eq(SecurityUtil.getUserSeq()))

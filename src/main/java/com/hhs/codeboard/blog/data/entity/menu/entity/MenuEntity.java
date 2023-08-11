@@ -13,6 +13,7 @@ import org.hibernate.annotations.Where;
 
 import java.io.Serial;
 import java.util.Collection;
+import java.util.List;
 
 
 @Getter
@@ -53,12 +54,16 @@ public class MenuEntity extends DefaultEntity {
 
     @Column
     private String uuid;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parentSeq")
+    private List<MenuEntity> childrenList;
+
 //
 //    /**
 //     * 해당 메뉴가 Board타입일때만 호출
 //     * 그냥 호출해도 상관없긴한데, 하위값은 없음.
 //     */
-    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name="boardSeq")
     @Where(clause = "del_date is null")

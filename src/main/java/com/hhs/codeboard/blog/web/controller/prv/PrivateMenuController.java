@@ -6,6 +6,7 @@ import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
 import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,15 +27,25 @@ public class PrivateMenuController {
 
     private final MenuService menuService;
 
+    @GetMapping("/findAll")
+    public ResponseEntity<CommonResponse<MenuDto>> findAll(MenuDto request, @AuthenticationPrincipal MemberDto memberInfo) {
+        // member 정보 제공
+        request.setUserSeq(memberInfo.getUserSeq());
+
+        Page<MenuDto> menuList = menuService.selectAll(request);
+        CommonResponse<MenuDto> response = new CommonResponse<>(menuList);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/save")
-    public ResponseEntity<CommonResponse<MenuDto>> saveMenu(@RequestBody MenuDto request) throws Exception {
+    public ResponseEntity<CommonResponse<MenuDto>> saveMenu(@RequestBody MenuDto request) {
         MenuDto menuDto = menuService.insertMenu(request);
         CommonResponse<MenuDto> response = new CommonResponse<>(menuDto);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/save")
-    public ResponseEntity<CommonResponse<Void>> updateMenu(@RequestBody MenuDto request) throws Exception {
+    public ResponseEntity<CommonResponse<Void>> updateMenu(@RequestBody MenuDto request) {
         menuService.updateMenu(request);
         CommonResponse<Void> response = new CommonResponse<>(HttpStatus.OK.value(), null, "success", false);
         return ResponseEntity.ok(response);

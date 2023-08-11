@@ -18,6 +18,8 @@ public class DefaultSearchDto extends DefaultDto{
     private int contentSize = 10;
     @JsonIgnore
     private int pageSize = 10;
+    @JsonIgnore
+    private Long userSeq;
 
     @JsonIgnore
     public long getOffset() {
