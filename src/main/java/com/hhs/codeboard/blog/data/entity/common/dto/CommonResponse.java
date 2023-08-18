@@ -32,6 +32,24 @@ public class CommonResponse<T> {
     }
 
     /**
+     * 단순 리스트 컨텐츠 응답용
+     * @param data
+     */
+    public CommonResponse(List<T> data) {
+        this.dataList = data;
+    }
+
+    public CommonResponse(List<T> data, String message) {
+        this(data);
+        this.message = message;
+    }
+
+    public CommonResponse(List<T> data, String message, boolean alertFlag) {
+        this(data, message);
+        this.alertFlag = alertFlag;
+    }
+
+    /**
      * 단일 컨텐츠 응답용
      * @param data
      */

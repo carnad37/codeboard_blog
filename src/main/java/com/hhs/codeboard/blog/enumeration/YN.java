@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum YN {
+public enum YN implements CodeboardEnum{
 
     Y("Y", true)
     , N("N", false);

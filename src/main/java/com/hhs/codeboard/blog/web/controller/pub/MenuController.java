@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/public/menu")
 @Slf4j
@@ -25,14 +27,14 @@ public class MenuController {
 
     @GetMapping("/findAll")
     public ResponseEntity<CommonResponse<MenuDto>> findAll(MenuDto request) {
-        Page<MenuDto> menuList = menuService.selectAll(request);
+        List<MenuDto> menuList = menuService.selectAll(request, true);
         CommonResponse<MenuDto> result = new CommonResponse<>(menuList);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/find")
     public ResponseEntity<CommonResponse<MenuDto>> findOne(MenuDto request) {
-        MenuDto menu = menuService.selectOne(request);
+        MenuDto menu = menuService.selectOne(request, true);
         CommonResponse<MenuDto> result = new CommonResponse<>(menu);
         return ResponseEntity.ok(result);
     }

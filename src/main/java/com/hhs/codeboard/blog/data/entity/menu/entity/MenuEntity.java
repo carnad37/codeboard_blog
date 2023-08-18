@@ -55,11 +55,13 @@ public class MenuEntity extends DefaultEntity {
     @Column
     private String uuid;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parentSeq")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
     private List<MenuEntity> childrenList;
 
-//
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parentSeq", insertable=false, updatable=false)
+    private MenuEntity parent;
+
 //    /**
 //     * 해당 메뉴가 Board타입일때만 호출
 //     * 그냥 호출해도 상관없긴한데, 하위값은 없음.

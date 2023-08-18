@@ -21,6 +21,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.service.spi.ServiceException;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ public class MenuService {
      * @return
      * @throws RuntimeException
      */
-    public MenuDto selectOne(MenuDto menuDto) throws CodeboardException {
+    public MenuDto selectOne(MenuDto menuDto, boolean publicFlag) throws CodeboardException {
         if (menuDto.getSeq() == null || menuDto.getSeq() < 1) {
             throw new CodeboardParameterException("타겟 정보가 없습니다.");
         } else {
@@ -65,7 +66,7 @@ public class MenuService {
                 jpaQueryFactory.selectFrom(menu)
                     .where(wheres)
                     .fetchOne())
-            .map(this::mapMenu)
+            .map(target->mapMenu(target, publicFlag))
             .orElseThrow(()->new RuntimeException("타겟 메뉴 정보가 없습니다."));
     }
 
@@ -75,7 +76,7 @@ public class MenuService {
      * @return
      * @throws CodeboardException
      */
-    public Page<MenuDto> selectAll(MenuDto menuDto) throws CodeboardException {
+    public List<MenuDto> selectAll(MenuDto menuDto, boolean publicFlag) throws CodeboardException {
         // validate
         if (!FormatUtil.Number.isPositive(menuDto.getUserSeq())) {
             throw new CodeboardParameterException("잘못된 요청입니다.");
@@ -86,12 +87,11 @@ public class MenuService {
         JPAQuery<MenuEntity> resultList = jpaQueryFactory.selectFrom(menu)
             .leftJoin(menu.childrenList, joinMenu)
             .fetchJoin()
-            .where(wheres);
+            .where(wheres)
+            .distinct();
 
-        JPAQuery<Long> totalCnt = jpaQueryFactory.select(menu.count()).from(menu)
-                .where(wheres);
 
-        return QueryUtil.getPage(resultList, totalCnt, menuDto, this::mapMenu);
+        return QueryUtil.getPageTreeMapping(resultList , target->mapMenu(target, publicFlag));
 
     }
 
@@ -132,7 +132,7 @@ public class MenuService {
         } else {
             // 부모가 본인 게시판인지 확인
             MenuDto checkParent = new MenuDto();
-            checkParent.setSeq(menuDto.getSeq());
+            checkParent.setSeq(menuDto.getParentSeq());
             if (Objects.isNull(getMenu(checkParent, memberDto))) throw new CodeboardParameterException("잘못된 접근입니다");
         }
 
@@ -366,7 +366,7 @@ public class MenuService {
         return Arrays.asList(
                 QueryUtil.longNullable(menuDto.getSeq(), menu.seq::eq),
                 QueryUtil.longNullable(menuDto.getUserSeq(), menu.regUserSeq::eq),
-                QueryUtil.longNullable(menuDto.getParentSeq(), menu.parentSeq::eq),
+                menuDto.getParentSeq() != null ? menu.parentSeq.eq(menuDto.getParentSeq()) : null,
                 SecurityUtil.isLogin() ?
                     menu.publicFlag.eq(YN.Y.getCode()).or(
                         menu.publicFlag.eq(YN.N.getCode()).and(menu.regUserSeq.eq(SecurityUtil.getUserSeq()))
@@ -388,7 +388,7 @@ public class MenuService {
      * @param entity
      * @return
      */
-    private MenuDto mapMenu(MenuEntity entity) {
+    private MenuDto mapMenu(MenuEntity entity, boolean publicFlag) {
         if (entity == null) return null;
         MenuDto menuDto = new MenuDto();
         menuDto.setTitle(entity.getTitle());
@@ -399,9 +399,14 @@ public class MenuService {
         menuDto.setMenuOrder(entity.getMenuOrder());
         menuDto.setUuid(entity.getUuid());
 
-        menuDto.setRegDate(entity.getRegDate());
-        menuDto.setModDate(entity.getModDate());
-        menuDto.setModDate(entity.getModDate());
+        if (!publicFlag) {
+            menuDto.setPublicFlag(EnumUtil.covertCodeboardEnum(YN.class, entity.getPublicFlag()));
+
+            menuDto.setRegDate(entity.getRegDate());
+            menuDto.setModDate(entity.getModDate());
+            menuDto.setModDate(entity.getModDate());
+        }
+
 
 //        menuDto.setChildrenMenu(entity.get);
 

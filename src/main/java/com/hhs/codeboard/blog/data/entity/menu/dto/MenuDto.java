@@ -2,6 +2,8 @@ package com.hhs.codeboard.blog.data.entity.menu.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hhs.codeboard.blog.config.anno.TreeMappingKey;
+import com.hhs.codeboard.blog.config.anno.TreeMappingTarget;
 import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleEntity;
 import com.hhs.codeboard.blog.data.entity.common.dto.DefaultDto;
 import com.hhs.codeboard.blog.data.entity.common.dto.DefaultSearchDto;
@@ -22,6 +24,7 @@ public class MenuDto extends DefaultSearchDto {
 
     private Integer menuOrder;
 
+    @TreeMappingKey(rootValue = "0")
     private Long parentSeq;
 
     private String uuid;
@@ -37,6 +40,7 @@ public class MenuDto extends DefaultSearchDto {
      */
     private List<BoardArticleEntity> articleList;
 
-    private List<MenuDto> childrenMenu;
+    @TreeMappingTarget
+    private List<MenuDto> childrenList;
 
 }

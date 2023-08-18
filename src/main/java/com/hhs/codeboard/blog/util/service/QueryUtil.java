@@ -1,22 +1,31 @@
 package com.hhs.codeboard.blog.util.service;
 
+import com.hhs.codeboard.blog.config.anno.TreeMappingKey;
+import com.hhs.codeboard.blog.config.anno.TreeMappingTarget;
 import com.hhs.codeboard.blog.data.entity.common.dto.DefaultSearchDto;
+import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
+import com.hhs.codeboard.blog.util.common.ReflectionUtils;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.sun.source.tree.Tree;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.temporal.TemporalAccessor;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.LongFunction;
-import java.util.function.LongSupplier;
+import java.util.*;
+import java.util.function.*;
 
 @UtilityClass
+@Slf4j
 public class QueryUtil {
 
     public static BooleanExpression stringNullable(String target , Function<String, BooleanExpression> func) {
@@ -56,7 +65,78 @@ public class QueryUtil {
                 , totalCount);
         return result.map(mapping);
     }
+
     public static <T, P extends DefaultSearchDto> Page<P> getPage(JPAQuery<T> contentList, JPAQuery<Long> totalCount, P request, Function<T, P> mapping) {
         return getPage(contentList, totalCount::fetchOne, request, mapping);
     }
+
+    public static <T, P extends DefaultSearchDto> List<P> getPageMapping(JPAQuery<T> resultList, Function<List<T>, List<P>> mapping) {
+        return mapping.apply(resultList.fetch());
+    }
+
+    public static <T, P extends DefaultSearchDto> List<P> getPageTreeMapping(JPAQuery<T> resultList, Function<T, P> mapping) {
+        List<T> targetList = resultList.fetch();
+        List<P> dataList = new ArrayList<>();
+
+        Map<Object, P> parentMap = new HashMap<>();
+        Map<Object, List<P>> childrenMap = new HashMap<>();
+
+        TreeMappingKey treeMappingKey = null;
+        String keyName = null;
+        Method keyMethod = null;
+        String targetName = null;
+        Method targetMethod = null;
+        try {
+            for (int rIdx = targetList.size() - 1; rIdx >= 0; rIdx--) {
+                P targetDto = mapping.apply(targetList.get(rIdx));
+                parentMap.put(targetDto.getSeq(), targetDto);
+
+                // Dto에서 특정 키가 되는 값의 정의가 필요.
+                if  (keyName == null || targetMethod == null) {
+                    for (Field tField : targetDto.getClass().getDeclaredFields()) {
+                        for (Annotation annotation : tField.getAnnotations()) {
+                            if (annotation instanceof TreeMappingKey) {
+//                        if (annotation instanceof TreeMappingKey treeMappingKeyData) { // JDK 14부터 가능 호환성 문제
+                                treeMappingKey = (TreeMappingKey) annotation;
+                                keyName = tField.getName();
+                            } else if (annotation instanceof TreeMappingTarget) {
+                                targetName = tField.getName();
+                            }
+                            if (keyName != null && targetName != null) {
+                                keyMethod = ReflectionUtils.findGetMethod(targetDto.getClass(), keyName);
+                                targetMethod = ReflectionUtils.findSetMethod(targetDto.getClass(), targetName);
+                                break;
+                            }
+                        }
+                        if (keyMethod != null && targetMethod != null) break;
+                    }
+
+                    if (keyMethod == null || targetMethod == null) return Collections.emptyList();
+                }
+
+                Object keyValue = keyMethod.invoke(targetDto);
+                if (treeMappingKey.rootValue().equals(String.valueOf(keyValue))) {
+                    // 루트인경우
+                    dataList.add(0, targetDto);
+                } else {
+                    // 루트가 아닌경우
+                    childrenMap.computeIfAbsent(keyValue, menuSeq -> new ArrayList<>()).add(0, targetDto);
+                }
+
+            }
+
+            // dataList도 같은 객체를 보고있으므로 자동으로 채워짐
+            for (Map.Entry<Object, List<P>> entry : childrenMap.entrySet()) {
+                P targetParent = parentMap.getOrDefault(entry.getKey(), null);
+                if (targetParent != null) {
+                    targetMethod.invoke(targetParent, entry.getValue());
+                }
+            }
+        } catch (InvocationTargetException | IllegalAccessException ex) {
+            return Collections.emptyList();
+        }
+
+        return dataList;
+    }
+
 }

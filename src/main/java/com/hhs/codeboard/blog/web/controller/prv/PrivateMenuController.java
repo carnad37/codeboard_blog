@@ -3,6 +3,7 @@ package com.hhs.codeboard.blog.web.controller.prv;
 import com.hhs.codeboard.blog.data.entity.common.dto.CommonResponse;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
+import com.hhs.codeboard.blog.util.service.QueryUtil;
 import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/private/menu")
@@ -32,7 +35,8 @@ public class PrivateMenuController {
         // member 정보 제공
         request.setUserSeq(memberInfo.getUserSeq());
 
-        Page<MenuDto> menuList = menuService.selectAll(request);
+        List<MenuDto> menuList = menuService.selectAll(request, false);
+
         CommonResponse<MenuDto> response = new CommonResponse<>(menuList);
         return ResponseEntity.ok(response);
     }
