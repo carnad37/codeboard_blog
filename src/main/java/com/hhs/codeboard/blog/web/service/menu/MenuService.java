@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -84,15 +85,17 @@ public class MenuService {
 
         Predicate[] wheres = getDefaultConditionToArray(menuDto);
 
-        JPAQuery<MenuEntity> resultList = jpaQueryFactory.selectFrom(menu)
-            .leftJoin(menu.childrenList, joinMenu)
-            .fetchJoin()
-            .where(wheres)
-            .distinct();
-
-
-        return QueryUtil.getPageTreeMapping(resultList , target->mapMenu(target, publicFlag));
-
+        if (menuDto.getParentSeq() == 0L) {
+            JPAQuery<MenuEntity> queryList = jpaQueryFactory.selectFrom(menu)
+                    .leftJoin(menu.childrenList, joinMenu)
+                    .fetchJoin()
+                    .where(wheres);
+            return QueryUtil.getPageTreeMapping(queryList , target->mapMenu(target, publicFlag));
+        } else {
+            JPAQuery<MenuEntity> queryList = jpaQueryFactory.selectFrom(menu)
+                    .where(wheres);
+            return queryList.fetch().stream().map(target->this.mapMenu(target, publicFlag)).toList();
+        }
     }
 
     /**
