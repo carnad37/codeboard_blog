@@ -11,6 +11,7 @@ import org.springframework.lang.Nullable;
 
 import java.io.Serial;
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -40,6 +41,9 @@ public class BoardArticleEntity extends DefaultEntity{
 
     @Column
     private Long categorySeq;
+
+    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY)
+    private List<BoardArticleContentEntity> contents;
 
 //    @OneToMany(fetch = FetchType.LAZY)
 //    @JoinColumn(name="articleSeq")
