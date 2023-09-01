@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -83,18 +84,22 @@ public class MenuService {
             throw new CodeboardParameterException("잘못된 요청입니다.");
         }
 
-        Predicate[] wheres = getDefaultConditionToArray(menuDto);
-
         if (menuDto.getParentSeq() == 0L) {
+            Predicate[] wheres = getDefaultConditionToArray(menuDto);
+
             JPAQuery<MenuEntity> queryList = jpaQueryFactory.selectFrom(menu)
                     .leftJoin(menu.childrenList, joinMenu)
                     .fetchJoin()
                     .where(wheres);
-            return QueryUtil.getPageTreeMapping(queryList , target->mapMenu(target, publicFlag));
+//            return QueryUtil.getPageTreeMapping(queryList , target->mapMenu(target, publicFlag));
+            return queryList.distinct().fetch().stream().map(target->mapMenu(target, publicFlag)).collect(Collectors.toList());
         } else {
+            Predicate[] wheres = getDefaultConditionToArray(menuDto);
+
             JPAQuery<MenuEntity> queryList = jpaQueryFactory.selectFrom(menu)
                     .where(wheres);
-            return queryList.fetch().stream().map(target->this.mapMenu(target, publicFlag)).toList();
+//            return queryList.fetch().stream().map(target->this.mapMenu(target, publicFlag)).toList();
+            return queryList.distinct().fetch().stream().map(target->mapMenu(target, publicFlag)).collect(Collectors.toList());
         }
     }
 
@@ -128,23 +133,27 @@ public class MenuService {
 
         MemberDto memberDto = SecurityUtil.getUser();
 
+        MenuEntity insert = new MenuEntity();
+
         if (menuDto.getParentSeq() < 1) {
             // root인경우
             // 부모값 세팅
             menuDto.setParentSeq(MenuSeqEnum.ROOT_MENU.getMenuSeq());
         } else {
             // 부모가 본인 게시판인지 확인
-            MenuDto checkParent = new MenuDto();
-            checkParent.setSeq(menuDto.getParentSeq());
-            if (Objects.isNull(getMenu(checkParent, memberDto))) throw new CodeboardParameterException("잘못된 접근입니다");
+            MenuEntity parentMenu = getParentMenu(menuDto, memberDto);
+            if (Objects.isNull(parentMenu)) {
+                throw new CodeboardParameterException("잘못된 접근입니다");
+            } else {
+                insert.setParent(parentMenu);
+            }
         }
 
-        MenuEntity insert = new MenuEntity();
         insert.setTitle(menuDto.getTitle());
         insert.setMenuType(menuDto.getMenuType().getCode());
         insert.setPublicFlag(menuDto.getPublicFlag().getCode());
         insert.setMenuOrder(menuDto.getMenuOrder());
-        insert.setParentSeq(menuDto.getParentSeq());
+//        insert.setParentSeq(menuDto.getParentSeq());
         insert.setRegUserSeq(memberDto.getUserSeq());
         insert.setRegDate(LocalDateTime.now());
         insert.setUuid(Pattern.compile("-").matcher(UUID.randomUUID().toString()).replaceAll(""));
@@ -213,122 +222,6 @@ public class MenuService {
     }
 
 
-//    /**
-//     * 메뉴 초기화
-//     * @param memberDto
-//     * @param request
-//     * @return
-//     */
-//    public List<MenuVO> initMenuList(MemberDto memberDto, HttpServletRequest request) {
-//
-//        List<MenuEntity> dbMenuList = menuDAO.findAllByRegUserSeqAndDelDateIsNull(memberDto.getUserSeq(), Sort.by(Sort.Direction.ASC, "menuOrder"));
-//
-//        List<MenuVO> menuList = new ArrayList<>();
-//        List<MenuVO> setInnerList = new ArrayList<>();
-//
-//        //기본메뉴
-//        MenuVO constMenuVO = new MenuVO();
-//
-//        //공통 설정
-//        MenuDto setMenu = new MenuDto();
-//        setMenu.setSeq(0L);
-//        setMenu.setTitle("공통메뉴");
-//        setMenu.setMenuType(MenuTypeEnum.S);
-//        constMenuVO.setMenu(setMenu);
-//
-//        //공통게시판 내용추가
-//        setMenu = new MenuDto();
-//        setMenu.setSeq(0L);
-//        setMenu.setTitle("게시판 목록");
-//        setMenu.setMenuType(MenuTypeEnum.D);
-//        setInnerList.add(new MenuVO(setMenu));
-//
-//        setMenu = new MenuDto();
-//        setMenu.setSeq(0L);
-//        setMenu.setTitle("메뉴 목록");
-//        setMenu.setMenuType(MenuTypeEnum.U);
-//        setInnerList.add(new MenuVO(setMenu));
-////        setInnerList.add(new MenuVO(new MenuEntity(0, "카테고리 설정", MenuTypeEnum.CATEGORY_CONFIG.getMenuType())));
-//
-//        constMenuVO.setChildrenMenu(setInnerList);
-//        menuList.add(constMenuVO);
-//
-//        //메뉴 맵 UUID::VO
-//        Map<Long, MenuVO> menuMap = new HashMap<>();
-//        List<MenuVO> addTopList = new ArrayList<>();
-//
-//        //부모자식 구분하기
-//        //게시판 같은경우 기본적으론 게시판 공통 메뉴 하위에 들어간다.
-//        //게시판 공통 메뉴 같은 경우 하위에 게시판이 있어야지만 활성화된다.
-//        for (MenuEntity dbMenu : dbMenuList) {
-//            MenuDto menuDto = modelMapper.map(dbMenu, MenuDto.class);
-//            MenuVO menuVO = new MenuVO(menuDto);
-//            if (menuMap.containsKey(menuVO.getSeq())) {
-//                MenuVO targetVO = menuMap.get(menuVO.getSeq());
-//                menuVO.setChildrenMenu(targetVO.getChildrenMenu());
-//            }
-//            menuMap.put(menuVO.getSeq(), menuVO);
-//            if (menuVO.getParentSeq() != null && menuVO.getParentSeq() > 0) {
-//                //부모값이 있는경우
-//                //부모메뉴가 menuMap에 없을경우 임시값 생성
-//                MenuVO parentVO = menuMap.computeIfAbsent(menuVO.getParentSeq(), key -> new MenuVO());
-//                //childrenList 초기화
-//                List<MenuVO> childrenList = parentVO.getChildrenMenu() == null ? new ArrayList<>() : parentVO.getChildrenMenu();
-//                childrenList.add(menuVO);
-//                parentVO.setChildrenMenu(childrenList);
-//            } else {
-//                //최상위 메뉴
-//                addTopList.add(menuVO);
-//            }
-//        }
-//
-//        MenuVO topMenu = new MenuVO();
-//        topMenu.setChildrenMenu(addTopList);
-//        menuList.addAll(addTopList);
-//
-//        SessionUtil.setSession(request, "menuList", menuList);
-//        SessionUtil.setSession(request, "menuMap", menuMap);
-//        SessionUtil.setSession(request, "maxDepth", getMaxDepth(topMenu, 0, 0));
-//
-//        return menuList;
-//    }
-
-    /**
-     * maxDept 얻기용 재귀 주회
-     * @param targetVO
-     * @param maxDepth
-     * @return
-     */
-//    private int getMaxDepth(MenuVO targetVO, int selfDepth, int maxDepth) {
-//        /**
-//         * selfDepth는 실제 해당 메뉴의 depth
-//         * maxDepth는 전체 주회돌면서 찾아야하는 maxDepth
-//         * maxDepth로 setDepth를 해주게되면 점점 depth가 늘어나는 오류가있어서
-//         * selfDepth값을 따로 둠으로서 해결.
-//         * 주회 종결시에는 selfDepth를 리턴해서 그동안 전달되온 maxDepth와 크기비교.
-//         * 모든 비교가 끝나면 검색점을 형제 메뉴로 옮기면서 maxDepth 전달.
-//         */
-//        //depth 설정
-//        targetVO.setDepth(selfDepth);
-//
-//        if (targetVO.getChildrenMenu() == null) {
-//            //재귀 종료
-//            return selfDepth;
-//        } else {
-//            //재귀 진행
-//            selfDepth += 1;
-//        }
-//
-//        //목록내에서 가장 큰 depth를 리턴
-//        for (MenuVO childrenVO : targetVO.getChildrenMenu()) {
-//            childrenVO.setDepth(selfDepth);
-//            int depth = getMaxDepth(childrenVO, selfDepth, maxDepth);
-//            maxDepth = Math.max(depth, maxDepth);
-//        }
-//
-//        return maxDepth;
-//    }
-
     /**
      * uuid 또는 id로 menuEntity 선택
      * @param menuDto
@@ -366,10 +259,22 @@ public class MenuService {
     }
 
     private List<Predicate> getDefaultCondition(MenuDto menuDto) {
+        MenuEntity parent = null;
+
+        BooleanExpression parentSeqExpress = null;
+        if (FormatUtil.Number.isPositive(menuDto.getParentSeq()))  {
+            MemberDto memberDto = new MemberDto();
+            if (FormatUtil.Number.isPositive(menuDto.getParentSeq())) memberDto.setUserSeq(menuDto.getUserSeq());
+            parent = getParentMenu(menuDto, memberDto);
+            parentSeqExpress = menu.parent.eq(parent);
+        } else if (menuDto.getParentSeq() == 0L) {
+            parentSeqExpress =  menu.parent.isNull();
+        }
+
         return Arrays.asList(
                 QueryUtil.longNullable(menuDto.getSeq(), menu.seq::eq),
                 QueryUtil.longNullable(menuDto.getUserSeq(), menu.regUserSeq::eq),
-                menuDto.getParentSeq() != null ? menu.parentSeq.eq(menuDto.getParentSeq()) : null,
+                parentSeqExpress,
                 SecurityUtil.isLogin() ?
                     menu.publicFlag.eq(YN.Y.getCode()).or(
                         menu.publicFlag.eq(YN.N.getCode()).and(menu.regUserSeq.eq(SecurityUtil.getUserSeq()))
@@ -396,7 +301,7 @@ public class MenuService {
         MenuDto menuDto = new MenuDto();
         menuDto.setTitle(entity.getTitle());
         menuDto.setSeq(entity.getSeq());
-        menuDto.setParentSeq(entity.getParentSeq());
+//        menuDto.setParentSeq(entity.getParentSeq());
 
         menuDto.setMenuType(EnumUtil.covertCodeboardEnum(MenuTypeEnum.class, entity.getMenuType()));
         menuDto.setMenuOrder(entity.getMenuOrder());
@@ -410,21 +315,17 @@ public class MenuService {
             menuDto.setModDate(entity.getModDate());
         }
 
-
-//        menuDto.setChildrenMenu(entity.get);
+        // Lazy하게 되어있으므로 따로 호출안함.
+//        menuDto.setChildrenList(entity.get);
 
         return menuDto;
     }
 
-//    /**
-//     * entity, dto 맵핑용
-//     * @param entity
-//     * @return
-//     */
-//    private MenuDto mapMenu(MenuEntity entity) {
-//        if (entity == null) return null;
-//        return modelMapper.map(entity, MenuDto.class);
-//    }
+    private MenuEntity getParentMenu(MenuDto menuDto, MemberDto memberDto) {
+        MenuDto checkParent = new MenuDto();
+        checkParent.setSeq(menuDto.getParentSeq());
+        return getMenu(checkParent, memberDto);
+    }
 
 
 }

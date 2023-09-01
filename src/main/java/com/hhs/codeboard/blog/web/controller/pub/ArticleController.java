@@ -5,6 +5,7 @@ import com.hhs.codeboard.blog.enumeration.YN;
 import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class ArticleController {
      * 게시물 조회
      */
     @GetMapping("/findAll")
-    public ResponseEntity<List<BoardArticleDto>> find(BoardArticleDto boardArticleRequest) {
+    public ResponseEntity<List<BoardArticleDto>> find(@ParameterObject BoardArticleDto boardArticleRequest) {
         return ResponseEntity.ok(articleService.selectArticleList(boardArticleRequest));
     }
 
@@ -31,7 +32,7 @@ public class ArticleController {
      * 게시물 단건 조회
      */
     @GetMapping("/find/{articleSeq}")
-    public ResponseEntity<BoardArticleDto> findOne(@PathVariable(value = "articleSeq") Long articleSeq) {
+    public ResponseEntity<BoardArticleDto> findOne(@ParameterObject @PathVariable(value = "articleSeq") Long articleSeq) {
         return ResponseEntity.ok(articleService.selectArticle(articleSeq));
     }
 

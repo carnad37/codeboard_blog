@@ -22,7 +22,7 @@ public class BoardCateItemEntity extends DefaultEntity{
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="cateSeq")
+    @JoinColumn(name="cate_seq")
     private BoardCategoryEntity boardCategory;
 
 }

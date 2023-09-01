@@ -24,8 +24,8 @@ public class BoardArticleContentEntity extends DefaultDateEntity {
     @GeneratedValue(strategy= GenerationType.TABLE, generator = CommonStaticProperty.SEQUENCE_TABLE_GENERATOR)
     private Long seq;
 
-    @Column
-    private Long articleSeq;
+//    @Column
+//    private Long articleSeq;
 
     @Column
     private String editor;
@@ -33,8 +33,11 @@ public class BoardArticleContentEntity extends DefaultDateEntity {
     @Column
     private String content;
 
+    @Column
+    private Long contentOrder;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "articleSeq", insertable = false, updatable = false)
+    @JoinColumn(name = "article_seq")
     private BoardArticleEntity article;
 
 }

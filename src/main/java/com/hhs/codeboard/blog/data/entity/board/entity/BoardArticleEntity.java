@@ -42,7 +42,9 @@ public class BoardArticleEntity extends DefaultEntity{
     @Column
     private Long categorySeq;
 
-    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY)
+//    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "article_seq")
     private List<BoardArticleContentEntity> contents;
 
 //    @OneToMany(fetch = FetchType.LAZY)

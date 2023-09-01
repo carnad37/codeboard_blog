@@ -1,10 +1,15 @@
 package com.hhs.codeboard.blog.data.entity.board.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hhs.codeboard.blog.data.entity.common.dto.DataFormatDto;
 import com.hhs.codeboard.blog.data.entity.common.dto.DefaultSearchDto;
 import com.hhs.codeboard.blog.enumeration.YN;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.springdoc.core.annotations.ParameterObject;
 
 import java.time.LocalDate;
 
@@ -27,5 +32,9 @@ public class BoardArticleDto extends DefaultSearchDto {
     private LocalDate searchStartDate;
     @JsonIgnore
     private LocalDate searchEndDate;
+
+    @Schema(implementation = DataFormatDto.class)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private DataFormatDto<BoardArticleContentDto> contents;
 
 }

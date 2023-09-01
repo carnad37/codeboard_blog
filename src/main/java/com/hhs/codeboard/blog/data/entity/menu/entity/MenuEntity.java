@@ -46,8 +46,8 @@ public class MenuEntity extends DefaultEntity {
     @Column
     private String menuType;
 
-    @Column
-    private Long parentSeq;
+//    @Column
+//    private Long parentSeq;
 
     @Column
     private String publicFlag;
@@ -59,16 +59,16 @@ public class MenuEntity extends DefaultEntity {
     private List<MenuEntity> childrenList;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parentSeq", insertable=false, updatable=false)
+    @JoinColumn(name = "parent_seq")
     private MenuEntity parent;
 
 //    /**
 //     * 해당 메뉴가 Board타입일때만 호출
 //     * 그냥 호출해도 상관없긴한데, 하위값은 없음.
 //     */
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name="boardSeq")
-    @Where(clause = "del_date is null")
-    private Collection<BoardArticleEntity> articleList;
+//    @OneToMany(fetch = FetchType.LAZY)
+//    @JoinColumn(name="board_seq")
+//    @Where(clause = "del_date is null")
+//    private Collection<BoardArticleEntity> articleList;
 
 }

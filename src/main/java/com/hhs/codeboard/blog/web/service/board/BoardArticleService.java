@@ -3,6 +3,7 @@ package com.hhs.codeboard.blog.web.service.board;
 import com.hhs.codeboard.blog.config.except.CodeboardException;
 import com.hhs.codeboard.blog.config.except.CodeboardParameterException;
 import com.hhs.codeboard.blog.config.except.NotFoundDataException;
+import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleContentEntity;
 import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleEntity;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import com.hhs.codeboard.blog.data.entity.menu.entity.QMenuEntity;
@@ -60,6 +61,7 @@ public class BoardArticleService {
         entity.setPublicFlag(request.getPublicFlag().getCode());
         entity.setModDate(LocalDateTime.now());
         entity.setModUserSeq(1L);
+
         //entity.setCategorys(request.getCategorySeq());
         articleDAO.save(entity);
         return mapBoardArticle(entity);

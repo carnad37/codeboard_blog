@@ -5,6 +5,7 @@ import com.hhs.codeboard.blog.data.entity.common.dto.CommonResponse;
 import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class PrivateArticleController {
     private final BoardArticleService articleService;
 
     @PostMapping("/save")
-    public ResponseEntity<CommonResponse<BoardArticleDto>> save(@RequestBody BoardArticleDto request) {
+    public ResponseEntity<CommonResponse<BoardArticleDto>> save(@ParameterObject  @RequestBody BoardArticleDto request) {
         BoardArticleDto article = articleService.saveArticle(request);
         CommonResponse<BoardArticleDto> response = new CommonResponse<>(article);
         return ResponseEntity.ok(response);

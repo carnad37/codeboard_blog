@@ -6,6 +6,7 @@ import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
 import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,14 +27,14 @@ public class MenuController {
     private final MenuService menuService;
 
     @GetMapping("/findAll")
-    public ResponseEntity<CommonResponse<MenuDto>> findAll(MenuDto request) {
+    public ResponseEntity<CommonResponse<MenuDto>> findAll(@ParameterObject MenuDto request) {
         List<MenuDto> menuList = menuService.selectAll(request, true);
         CommonResponse<MenuDto> result = new CommonResponse<>(menuList);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/find")
-    public ResponseEntity<CommonResponse<MenuDto>> findOne(MenuDto request) {
+    public ResponseEntity<CommonResponse<MenuDto>> findOne(@ParameterObject MenuDto request) {
         MenuDto menu = menuService.selectOne(request, true);
         CommonResponse<MenuDto> result = new CommonResponse<>(menu);
         return ResponseEntity.ok(result);
