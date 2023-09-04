@@ -15,5 +15,5 @@ spring:
     password: testdb#
 
 codeboard:
-  member: http://codeboard-member
+  member: http://codeboard-member:8080
 
