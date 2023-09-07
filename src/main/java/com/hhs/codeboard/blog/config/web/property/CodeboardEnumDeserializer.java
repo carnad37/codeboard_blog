@@ -35,7 +35,7 @@ class CodeboardEnumDeserializer {
         public JsonDeserializer<?> findEnumDeserializer(Class<?> type, DeserializationConfig config, BeanDescription beanDesc) {
             // 구현체인지 확인
             if (CodeboardEnum.class.isAssignableFrom(type)) {
-                JsonDeserializer<?> enumDeserializer = new SerializerProcess(type);
+                JsonDeserializer<?> enumDeserializer = new DeserializerProcess(type);
                 addDeserializer(type, enumDeserializer);
                 return enumDeserializer;
             }
@@ -57,9 +57,9 @@ class CodeboardEnumDeserializer {
     /**
      * 역직렬화용
      */
-    private static class SerializerProcess extends StdDeserializer<Enum<? extends CodeboardEnum>> implements ContextualDeserializer {
+    private static class DeserializerProcess extends StdDeserializer<Enum<? extends CodeboardEnum>> implements ContextualDeserializer {
 
-        protected SerializerProcess(Class<?> vc) {
+        protected DeserializerProcess(Class<?> vc) {
             super(vc);
         }
 
@@ -96,8 +96,9 @@ class CodeboardEnumDeserializer {
 
         @Override
         public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
-            return new SerializerProcess(property.getType().getRawClass());
+            return new DeserializerProcess(property.getType().getRawClass());
         }
+
     }
 
 }

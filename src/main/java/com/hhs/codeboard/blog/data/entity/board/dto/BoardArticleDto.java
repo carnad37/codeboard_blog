@@ -1,5 +1,6 @@
 package com.hhs.codeboard.blog.data.entity.board.dto;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hhs.codeboard.blog.data.entity.common.dto.DataFormatDto;
@@ -12,13 +13,13 @@ import lombok.Setter;
 import org.springdoc.core.annotations.ParameterObject;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
 public class BoardArticleDto extends DefaultSearchDto {
 
 //    @Parameter swagger 테스트
-    @JsonIgnore
     private Long seq;
 
     private String title;
@@ -33,8 +34,11 @@ public class BoardArticleDto extends DefaultSearchDto {
     @JsonIgnore
     private LocalDate searchEndDate;
 
-    @Schema(implementation = DataFormatDto.class)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private DataFormatDto<BoardArticleContentDto> contents;
+    private List<BoardArticleContentDto> contents;
+
+    @Schema(implementation = DataFormatDto.class)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private DataFormatDto<BoardArticleContentDto> uploadContents;
 
 }

@@ -5,7 +5,6 @@ import com.hhs.codeboard.blog.config.except.CodeboardParameterException;
 import com.hhs.codeboard.blog.config.except.NotFoundDataException;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import com.hhs.codeboard.blog.data.entity.menu.entity.QMenuEntity;
-import com.hhs.codeboard.blog.enumeration.MenuSeqEnum;
 import com.hhs.codeboard.blog.enumeration.MenuTypeEnum;
 import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
 import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
@@ -58,8 +57,6 @@ public class MenuService {
     public MenuDto selectOne(MenuDto menuDto, boolean publicFlag) throws CodeboardException {
         if (menuDto.getSeq() == null || menuDto.getSeq() < 1) {
             throw new CodeboardParameterException("타겟 정보가 없습니다.");
-        } else {
-            menuDto.setRegUserSeq(null);
         }
 
         Predicate[] wheres = getDefaultConditionToArray(menuDto);
@@ -135,10 +132,10 @@ public class MenuService {
 
         MenuEntity insert = new MenuEntity();
 
-        if (menuDto.getParentSeq() < 1) {
+        if (!FormatUtil.Number.isPositive(menuDto.getParentSeq())) {
             // root인경우
             // 부모값 세팅
-            menuDto.setParentSeq(MenuSeqEnum.ROOT_MENU.getMenuSeq());
+            menuDto.setParentSeq(null);
         } else {
             // 부모가 본인 게시판인지 확인
             MenuEntity parentMenu = getParentMenu(menuDto, memberDto);
@@ -153,7 +150,6 @@ public class MenuService {
         insert.setMenuType(menuDto.getMenuType().getCode());
         insert.setPublicFlag(menuDto.getPublicFlag().getCode());
         insert.setMenuOrder(menuDto.getMenuOrder());
-//        insert.setParentSeq(menuDto.getParentSeq());
         insert.setRegUserSeq(memberDto.getUserSeq());
         insert.setRegDate(LocalDateTime.now());
         insert.setUuid(Pattern.compile("-").matcher(UUID.randomUUID().toString()).replaceAll(""));
@@ -267,7 +263,7 @@ public class MenuService {
             if (FormatUtil.Number.isPositive(menuDto.getParentSeq())) memberDto.setUserSeq(menuDto.getUserSeq());
             parent = getParentMenu(menuDto, memberDto);
             parentSeqExpress = menu.parent.eq(parent);
-        } else if (menuDto.getParentSeq() == 0L) {
+        } else {
             parentSeqExpress =  menu.parent.isNull();
         }
 

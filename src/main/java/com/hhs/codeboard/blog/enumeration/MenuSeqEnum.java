@@ -1,17 +1,16 @@
-package com.hhs.codeboard.blog.enumeration;
-
-public enum MenuSeqEnum {
-
-    STATIC_MENU(-1), ROOT_MENU(0);
-
-    private long menuSeq;
-
-    MenuSeqEnum (long menuSeq) {
-        this.menuSeq = menuSeq;
-    }
-
-    public long getMenuSeq() {
-        return this.menuSeq;
-    }
-    
-}
+//package com.hhs.codeboard.blog.enumeration;
+//
+//import lombok.RequiredArgsConstructor;
+//
+//@RequiredArgsConstructor
+//public enum MenuSeqEnum {
+//
+//    STATIC_MENU(-1L), ROOT_MENU(null);
+//
+//    private final Long menuSeq;
+//
+//    public long getMenuSeq() {
+//        return this.menuSeq;
+//    }
+//
+//}

@@ -20,20 +20,20 @@ public class ArticleController {
 
     private final BoardArticleService articleService;
 
-    /**
-     * 게시물 조회
-     */
-    @GetMapping("/findAll")
-    public ResponseEntity<List<BoardArticleDto>> find(@ParameterObject BoardArticleDto boardArticleRequest) {
-        return ResponseEntity.ok(articleService.selectArticleList(boardArticleRequest));
-    }
-
-    /**
-     * 게시물 단건 조회
-     */
-    @GetMapping("/find/{articleSeq}")
-    public ResponseEntity<BoardArticleDto> findOne(@ParameterObject @PathVariable(value = "articleSeq") Long articleSeq) {
-        return ResponseEntity.ok(articleService.selectArticle(articleSeq));
-    }
+//    /**
+//     * 게시물 조회
+//     */
+//    @GetMapping("/findAll")
+//    public ResponseEntity<List<BoardArticleDto>> find(@ParameterObject BoardArticleDto boardArticleRequest) {
+//        return ResponseEntity.ok(articleService.selectArticleList(boardArticleRequest));
+//    }
+//
+//    /**
+//     * 게시물 단건 조회
+//     */
+//    @GetMapping("/find/{articleSeq}")
+//    public ResponseEntity<BoardArticleDto> findOne(@ParameterObject @PathVariable(value = "articleSeq") Long articleSeq) {
+//        return ResponseEntity.ok(articleService.selectArticle(articleSeq));
+//    }
 
 }

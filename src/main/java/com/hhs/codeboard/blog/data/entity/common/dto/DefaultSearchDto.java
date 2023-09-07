@@ -12,11 +12,8 @@ import java.util.Objects;
 @Setter
 public class DefaultSearchDto extends DefaultDto{
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int pageIndex = 1;
-    @JsonIgnore
     private int contentSize = 10;
-    @JsonIgnore
     private int pageSize = 10;
     @JsonIgnore
     private Long userSeq;

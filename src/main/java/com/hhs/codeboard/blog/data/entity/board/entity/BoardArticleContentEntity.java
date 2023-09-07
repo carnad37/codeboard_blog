@@ -27,17 +27,17 @@ public class BoardArticleContentEntity extends DefaultDateEntity {
 //    @Column
 //    private Long articleSeq;
 
-    @Column
+    @Column(nullable = false)
     private String editor;
 
-    @Column
+    @Column(nullable = false)
     private String content;
 
-    @Column
+    @Column(nullable = false)
     private Long contentOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "article_seq")
+    @JoinColumn(name = "article_seq", updatable = false)
     private BoardArticleEntity article;
 
 }

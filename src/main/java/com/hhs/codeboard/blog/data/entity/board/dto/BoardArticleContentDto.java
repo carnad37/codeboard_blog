@@ -14,11 +14,10 @@ import java.time.LocalDate;
 @Setter
 public class BoardArticleContentDto implements Serializable {
 
-    @JsonIgnore
     private Long seq;
-
     private Long articleSeq;
     private EditorType editor;
     private String content;
+    private Long contentOrder;
 
 }

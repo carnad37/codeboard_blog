@@ -43,6 +43,16 @@ public class PrivateMenuController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/find")
+    public ResponseEntity<CommonResponse<MenuDto>> find(@ParameterObject MenuDto request, @AuthenticationPrincipal MemberDto memberInfo) {
+        // member 정보 제공
+        request.setUserSeq(memberInfo.getUserSeq());
+        MenuDto menu = menuService.selectOne(request, false);
+
+        CommonResponse<MenuDto> response = new CommonResponse<>(menu);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/save")
     public ResponseEntity<CommonResponse<MenuDto>> saveMenu(@ParameterObject @RequestBody MenuDto request) {
         MenuDto menuDto = menuService.insertMenu(request);

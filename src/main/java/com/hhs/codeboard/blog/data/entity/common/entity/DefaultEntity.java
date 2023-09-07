@@ -17,11 +17,11 @@ public abstract class DefaultEntity extends DefaultDateEntity {
 	private static final long serialVersionUID = 3989969904364677147L;
 
 	@Id
-	@Column
+	@Column(nullable = false, updatable = false)
 	@GeneratedValue(strategy= GenerationType.TABLE, generator = CommonStaticProperty.SEQUENCE_TABLE_GENERATOR)
 	private Long seq;
 
-	@Column
+	@Column(nullable = false, updatable = false)
 	private Long regUserSeq;
 
 	@Column

@@ -24,6 +24,13 @@ public class PrivateArticleController {
 
     private final BoardArticleService articleService;
 
+    @GetMapping("/findAll")
+    public ResponseEntity<CommonResponse<BoardArticleDto>> findAll(@ParameterObject BoardArticleDto boardArticleRequest) {
+        CommonResponse<BoardArticleDto> response = new CommonResponse<>(articleService.selectArticleList(boardArticleRequest));
+        return ResponseEntity.ok(response);
+
+    }
+
     @PostMapping("/save")
     public ResponseEntity<CommonResponse<BoardArticleDto>> save(@ParameterObject  @RequestBody BoardArticleDto request) {
         BoardArticleDto article = articleService.saveArticle(request);

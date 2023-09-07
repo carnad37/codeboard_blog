@@ -40,7 +40,7 @@ public class SecurityUtil {
                 .orElse(null);
     }
 
-    public static long getUserSeq() {
+    public static Long getUserSeq() {
         return Optional.ofNullable(getSecurityContextHolder())
                     .filter(target->isLogin())
                     .map(target->(MemberDto) target.getPrincipal())

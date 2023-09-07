@@ -28,6 +28,10 @@ import java.util.function.*;
 @Slf4j
 public class QueryUtil {
 
+    /**
+     * 들어온 값이 Null이면 BooleanExpression를 Null로 리턴해서 조건에서 제외
+     * 값이 Null이여도 조건에 포함되어야하면 쓰면안됨.
+     */
     public static BooleanExpression stringNullable(String target , Function<String, BooleanExpression> func) {
         return StringUtils.hasText(target) ? func.apply(target) : null;
     }
@@ -50,6 +54,7 @@ public class QueryUtil {
     /**
      * pageable에서 offset을 꺼내고 다시 그걸또 파라미터로 넘기는게 이상해서 만든 기능.
      * offset같은 slice기능은 모두 해당 기능에서 작동.
+     *
      * @param contentList
      * @param totalCount
      * @param request 페이지 정보를 위해 가져옴
@@ -74,6 +79,21 @@ public class QueryUtil {
         return mapping.apply(resultList.fetch());
     }
 
+    /**
+     * jpa의 구조상 부모값을 부모 엔티티, 자식값을 자식 엔티티 리스트로 설정하지않으면
+     * 자동으로 맵핑해주질 않음.(그래도 dinstinct는 해야함)
+     *
+     * TreeMappingKey 랑 TreeMappingTarget를 이용해서
+     * 맵핑가능하게 만든 구조.
+     *
+     * 해당기능을 이용하면 부모값을 원시값으로 하고도 mybatis의 nested select처럼 사용가능할듯.
+     *
+     * @param resultList
+     * @param mapping
+     * @return
+     * @param <T>
+     * @param <P>
+     */
     public static <T, P extends DefaultSearchDto> List<P> getPageTreeMapping(JPAQuery<T> resultList, Function<T, P> mapping) {
         List<T> targetList = resultList.fetch();
         List<P> dataList = new ArrayList<>();

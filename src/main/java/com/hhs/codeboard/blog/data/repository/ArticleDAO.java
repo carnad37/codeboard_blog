@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface ArticleDAO extends JpaRepository<BoardArticleEntity, Long>, JpaSpecificationExecutor<BoardArticleEntity> {
 
     //카테고리 값으로 검색
-    Optional<BoardArticleEntity> findBySeqAndRegUserSeq(Long seq, Integer userSeq);
+    Optional<BoardArticleEntity> findBySeqAndRegUserSeq(Long seq, Long userSeq);
 
     //카테고리 값으로 검색
     List<BoardArticleEntity> findAllByCategorySeq(Integer categorySeq);

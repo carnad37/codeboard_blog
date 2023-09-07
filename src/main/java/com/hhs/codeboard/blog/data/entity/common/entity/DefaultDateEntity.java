@@ -20,7 +20,7 @@ public abstract class DefaultDateEntity implements Serializable {
 	/**
 	 * entity정보
 	 */
-	@Column
+	@Column(nullable = false)
 	private LocalDateTime regDate;
 	
 	@Column
