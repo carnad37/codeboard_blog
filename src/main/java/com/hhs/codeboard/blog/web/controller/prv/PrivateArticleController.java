@@ -28,7 +28,7 @@ public class PrivateArticleController {
     public ResponseEntity<CommonResponse<BoardArticleResponse>> findAll(@ParameterObject BoardArticleDto boardArticleRequest) {
         Page<BoardArticleDto> result = articleService.selectArticleList(boardArticleRequest);
         BoardArticleResponse response = new BoardArticleResponse();
-        response.setTotalCnt(response.getTotalCnt());
+        response.setTotalCnt(result.getTotalPages());
         response.setArticleList(result.getContent());
         return ResponseEntity.ok(new CommonResponse<>(response));
     }

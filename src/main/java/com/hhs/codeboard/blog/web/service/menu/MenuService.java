@@ -225,7 +225,7 @@ public class MenuService {
      * @return
      * @throws Exception
      */
-    private MenuEntity getMenu(MenuDto menuDto, MemberDto member) throws CodeboardException {
+    public MenuEntity getMenu(MenuDto menuDto, MemberDto member) throws CodeboardException {
         BooleanExpression[] whereArray = {
                 null        // 변경조건 들어갈자리
                 , menu.delDate.isNull()

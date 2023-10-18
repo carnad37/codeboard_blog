@@ -8,6 +8,8 @@ import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleContentEntity
 import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleContentEntity;
 import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleEntity;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
+import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
+import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
 import com.hhs.codeboard.blog.data.entity.menu.entity.QMenuEntity;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleDto;
 import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleEntity;
@@ -20,6 +22,7 @@ import com.hhs.codeboard.blog.util.common.EnumUtil;
 import com.hhs.codeboard.blog.util.common.FormatUtil;
 import com.hhs.codeboard.blog.util.service.QueryUtil;
 import com.hhs.codeboard.blog.util.service.SecurityUtil;
+import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -43,6 +46,7 @@ public class BoardArticleService {
 
     private final ArticleDAO articleDAO;
     private final MenuDAO menuDAO;
+    private final MenuService menuService;
     private final ArticleContentDAO contentDAO;
     private final JPAQueryFactory jpaQueryFactory;
 
@@ -58,18 +62,33 @@ public class BoardArticleService {
      */
     public BoardArticleDto saveArticle(BoardArticleDto request) {
         Long userSeq = SecurityUtil.getUserSeq();
-        // boardSeq
-        BoardArticleEntity entity = articleDAO.findBySeqAndRegUserSeq(request.getSeq(), userSeq)
-                .orElseGet(()->{
-                    BoardArticleEntity supEntity = new BoardArticleEntity();
-                    supEntity.setRegDate(LocalDateTime.now());
-                    supEntity.setRegUserSeq(userSeq);
-                    return supEntity;
-                });
+
+        // 수정일 경우 seq값이 있고, 아닐경우 없음
+        BoardArticleEntity entity;
+        if (FormatUtil.Number.isPositive(request.getSeq())) {
+            // articleSeq
+            entity = articleDAO.findBySeqAndRegUserSeq(request.getSeq(), userSeq)
+                    .orElseThrow(()->new CodeboardParameterException("게시물 정보가 잘못되었습니다."));
+        } else {
+            // 새등록일 경우
+            entity = new BoardArticleEntity();
+            entity.setRegDate(LocalDateTime.now());
+            entity.setRegUserSeq(userSeq);
+            // board값 체크필요.
+            MenuDto menuDto = new MenuDto();
+            menuDto.setSeq(request.getBoardSeq());
+
+            MemberDto memberDto = new MemberDto();
+            memberDto.setUserSeq(userSeq);
+
+            if (Objects.isNull(menuService.getMenu(menuDto, memberDto))) {
+                throw new CodeboardParameterException("잘못된 접근입니다.");
+            }
+
+            entity.setBoardSeq(request.getBoardSeq());
+        }
 
         // TODO :: BoardSeq값 유효성 체크 필요
-        // 현재 구조로는 타인의 board에 파라미터 위조로 입력가능해짐
-//        entity.setBoardSeq(request.getBoardSeq());
         entity.setTitle(request.getTitle());
         entity.setSummary(request.getSummary());
         entity.setContent(request.getContent());
@@ -171,12 +190,10 @@ public class BoardArticleService {
             );
 
         LongSupplier totalCnt = ()->jpaQueryFactory.select(article.count())
-                .from(article)
-                .where(
-                        whereList.stream().filter(Objects::nonNull).toArray(BooleanExpression[]::new)
-                ).fetchFirst();
-
-
+            .from(article)
+            .where(
+                    whereList.stream().filter(Objects::nonNull).toArray(BooleanExpression[]::new)
+            ).fetchFirst();
 
         return QueryUtil.getPage(result, totalCnt, articleRequest, (target)->this.mapBoardArticle(target, false));
     }
