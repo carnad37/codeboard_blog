@@ -231,9 +231,11 @@ public class BoardArticleService {
      */
     private BooleanExpression memberCondition(MemberDto memberDto) {
         if (memberDto != null) {
-            return article.publicFlag.eq(YN.Y.getCode()).or(
-                    article.publicFlag.eq(YN.N.getCode()).and(article.regUserSeq.eq(memberDto.getUserSeq()))
-            );
+            return article.publicFlag.eq(YN.Y.getCode())
+                    .or(
+                        article.publicFlag.eq(YN.N.getCode())
+                            .and(article.regUserSeq.eq(memberDto.getUserSeq()))
+                    );
         } else {
             // 로그인 안한상태
             return article.publicFlag.eq(YN.Y.getCode());

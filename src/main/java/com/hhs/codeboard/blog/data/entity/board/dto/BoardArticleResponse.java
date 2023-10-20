@@ -10,7 +10,9 @@ import java.util.List;
 @Setter
 public class BoardArticleResponse implements Serializable {
 
-    private int totalCnt = 0;
+    private int totalPage = 0;
+
+    private boolean isMine = false;
 
     private List<BoardArticleDto> articleList;
 

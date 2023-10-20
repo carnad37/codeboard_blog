@@ -4,6 +4,7 @@ import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleDto;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleResponse;
 import com.hhs.codeboard.blog.data.entity.common.dto.CommonResponse;
 import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
+import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
@@ -23,12 +24,17 @@ import org.springframework.web.bind.annotation.*;
 public class PrivateArticleController {
 
     private final BoardArticleService articleService;
+    private final MenuService menuService;
 
     @GetMapping("/findAll")
     public ResponseEntity<CommonResponse<BoardArticleResponse>> findAll(@ParameterObject BoardArticleDto boardArticleRequest) {
+        // 유저 로그인상태일때만 접근됨.
+//        if () {
+//
+//        }
         Page<BoardArticleDto> result = articleService.selectArticleList(boardArticleRequest);
         BoardArticleResponse response = new BoardArticleResponse();
-        response.setTotalCnt(result.getTotalPages());
+        response.setTotalPage(result.getTotalPages());
         response.setArticleList(result.getContent());
         return ResponseEntity.ok(new CommonResponse<>(response));
     }
