@@ -54,7 +54,10 @@ public class MenuService {
      * @return
      * @throws RuntimeException
      */
-    public MenuDto selectOne(MenuDto menuDto, boolean publicFlag) throws CodeboardException {
+    public MenuDto selectOne(MenuDto menuDto) throws CodeboardException {
+        // userInfo
+        boolean publicFlag = privateChecker(menuDto);
+
         if (menuDto.getSeq() == null || menuDto.getSeq() < 1) {
             throw new CodeboardParameterException("타겟 정보가 없습니다.");
         }
@@ -75,11 +78,14 @@ public class MenuService {
      * @return
      * @throws CodeboardException
      */
-    public List<MenuDto> selectAll(MenuDto menuDto, boolean publicFlag) throws CodeboardException {
+    public List<MenuDto> selectAll(MenuDto menuDto) throws CodeboardException {
+        // userInfo
+        boolean publicFlag = privateChecker(menuDto);
+
         // validate
-        if (!FormatUtil.Number.isPositive(menuDto.getUserSeq())) {
-            throw new CodeboardParameterException("잘못된 요청입니다.");
-        }
+//        if (!FormatUtil.Number.isPositive(menuDto.getUserSeq())) {
+//            throw new CodeboardParameterException("잘못된 요청입니다.");
+//        }
 
         if (menuDto.getParentSeq() == 0L) {
             Predicate[] wheres = getDefaultConditionToArray(menuDto);
@@ -88,14 +94,12 @@ public class MenuService {
                     .leftJoin(menu.childrenList, joinMenu)
                     .fetchJoin()
                     .where(wheres);
-//            return QueryUtil.getPageTreeMapping(queryList , target->mapMenu(target, publicFlag));
             return queryList.distinct().fetch().stream().map(target->mapMenu(target, publicFlag)).collect(Collectors.toList());
         } else {
             Predicate[] wheres = getDefaultConditionToArray(menuDto);
 
             JPAQuery<MenuEntity> queryList = jpaQueryFactory.selectFrom(menu)
                     .where(wheres);
-//            return queryList.fetch().stream().map(target->this.mapMenu(target, publicFlag)).toList();
             return queryList.distinct().fetch().stream().map(target->mapMenu(target, publicFlag)).collect(Collectors.toList());
         }
     }
@@ -255,9 +259,9 @@ public class MenuService {
     }
 
     private List<Predicate> getDefaultCondition(MenuDto menuDto) {
-        MenuEntity parent = null;
+        MenuEntity parent;
+        BooleanExpression parentSeqExpress;
 
-        BooleanExpression parentSeqExpress = null;
         if (FormatUtil.Number.isPositive(menuDto.getParentSeq()))  {
             MemberDto memberDto = new MemberDto();
             if (FormatUtil.Number.isPositive(menuDto.getParentSeq())) memberDto.setUserSeq(menuDto.getUserSeq());
@@ -303,6 +307,9 @@ public class MenuService {
         menuDto.setMenuOrder(entity.getMenuOrder());
         menuDto.setUuid(entity.getUuid());
 
+        // 프론트에서 소유주 체크용
+        menuDto.setRegUserSeq(entity.getRegUserSeq());
+
         if (!publicFlag) {
             menuDto.setPublicFlag(EnumUtil.covertCodeboardEnum(YN.class, entity.getPublicFlag()));
 
@@ -321,6 +328,25 @@ public class MenuService {
         MenuDto checkParent = new MenuDto();
         checkParent.setSeq(menuDto.getParentSeq());
         return getMenu(checkParent, memberDto);
+    }
+
+    private boolean privateChecker(MenuDto menuDto) {
+        if (SecurityUtil.isLogin()) {
+            // 조회 경우의수
+            // 1.비로그인 + 특정유저 목록 조회
+            // 2.비로그인 + 하위메뉴 조회
+            // 3.로그인 자기메뉴조회
+            // 4.로그인 특정유저 목록 조회
+            // 5.로그인 하위메뉴 조회
+            if (!FormatUtil.Number.isPositive(menuDto.getParentSeq())) {
+                menuDto.setRegUserSeq(SecurityUtil.getUserSeq());
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
     }
 
 

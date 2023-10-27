@@ -12,7 +12,7 @@ public class BoardArticleResponse implements Serializable {
 
     private int totalPage = 0;
 
-    private boolean isMine = false;
+    private long totalCnt = 0;
 
     private List<BoardArticleDto> articleList;
 

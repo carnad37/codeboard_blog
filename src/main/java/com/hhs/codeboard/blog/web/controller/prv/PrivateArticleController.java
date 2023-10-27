@@ -26,31 +26,11 @@ public class PrivateArticleController {
     private final BoardArticleService articleService;
     private final MenuService menuService;
 
-    @GetMapping("/findAll")
-    public ResponseEntity<CommonResponse<BoardArticleResponse>> findAll(@ParameterObject BoardArticleDto boardArticleRequest) {
-        // 유저 로그인상태일때만 접근됨.
-//        if () {
-//
-//        }
-        Page<BoardArticleDto> result = articleService.selectArticleList(boardArticleRequest);
-        BoardArticleResponse response = new BoardArticleResponse();
-        response.setTotalPage(result.getTotalPages());
-        response.setArticleList(result.getContent());
-        return ResponseEntity.ok(new CommonResponse<>(response));
-    }
-
-    @GetMapping("/find")
-    public ResponseEntity<CommonResponse<BoardArticleDto>> find(@ParameterObject BoardArticleDto boardArticleRequest) {
-        CommonResponse<BoardArticleDto> response = new CommonResponse<>(articleService.selectArticle(boardArticleRequest.getSeq()));
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/save")
     public ResponseEntity<CommonResponse<BoardArticleDto>> save(@ParameterObject  @RequestBody BoardArticleDto request) {
         BoardArticleDto article = articleService.saveArticle(request);
         CommonResponse<BoardArticleDto> response = new CommonResponse<>(article);
         return ResponseEntity.ok(response);
     }
-
 
 }

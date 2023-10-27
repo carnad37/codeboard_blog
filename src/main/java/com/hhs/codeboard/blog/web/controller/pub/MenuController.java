@@ -28,14 +28,14 @@ public class MenuController {
 
     @GetMapping("/findAll")
     public ResponseEntity<CommonResponse<MenuDto>> findAll(@ParameterObject MenuDto request) {
-        List<MenuDto> menuList = menuService.selectAll(request, true);
+        List<MenuDto> menuList = menuService.selectAll(request);
         CommonResponse<MenuDto> result = new CommonResponse<>(menuList);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/find")
     public ResponseEntity<CommonResponse<MenuDto>> findOne(@ParameterObject MenuDto request) {
-        MenuDto menu = menuService.selectOne(request, true);
+        MenuDto menu = menuService.selectOne(request);
         CommonResponse<MenuDto> result = new CommonResponse<>(menu);
         return ResponseEntity.ok(result);
     }

@@ -4,6 +4,7 @@ import com.hhs.codeboard.blog.config.except.CodeboardException;
 import com.hhs.codeboard.blog.config.except.CodeboardParameterException;
 import com.hhs.codeboard.blog.config.except.NotFoundDataException;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleContentDto;
+import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleResponse;
 import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleContentEntity;
 import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleContentEntity;
 import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleEntity;
@@ -169,7 +170,7 @@ public class BoardArticleService {
      * @param articleRequest
      * @return
      */
-    public Page<BoardArticleDto> selectArticleList(BoardArticleDto articleRequest) {
+    public BoardArticleResponse selectArticleList(BoardArticleDto articleRequest) {
         // validate
         MemberDto memberDto = SecurityUtil.getUser();
 
@@ -195,7 +196,14 @@ public class BoardArticleService {
                     whereList.stream().filter(Objects::nonNull).toArray(BooleanExpression[]::new)
             ).fetchFirst();
 
-        return QueryUtil.getPage(result, totalCnt, articleRequest, (target)->this.mapBoardArticle(target, false));
+        Page<BoardArticleDto> pageList = QueryUtil.getPage(result, totalCnt, articleRequest, (target)->this.mapBoardArticle(target, false));
+
+        BoardArticleResponse response = new BoardArticleResponse();
+        response.setTotalPage(pageList.getTotalPages());
+        response.setTotalCnt(pageList.getTotalElements());
+        response.setArticleList(pageList.getContent());
+
+        return response;
     }
 
     /**

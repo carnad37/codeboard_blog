@@ -2,6 +2,8 @@ package com.hhs.codeboard.blog.data.entity.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 
@@ -9,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
 public class CommonResponse<T> {
 
     /**
