@@ -30,7 +30,7 @@ public class BoardArticleContentEntity extends DefaultDateEntity {
     @Column(nullable = false)
     private String editor;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
 
     @Column(nullable = false)

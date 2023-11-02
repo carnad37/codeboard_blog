@@ -33,4 +33,12 @@ public class PrivateArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/delete")
+    public ResponseEntity<CommonResponse<BoardArticleDto>> delete(@ParameterObject  @RequestBody BoardArticleDto request) {
+        BoardArticleDto article = articleService.deleteArticle(request);
+        CommonResponse<BoardArticleDto> response = new CommonResponse<>(article);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

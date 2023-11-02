@@ -207,6 +207,25 @@ public class BoardArticleService {
     }
 
     /**
+     * 게시물 삭제
+     * @param request
+     * @return
+     */
+    public BoardArticleDto deleteArticle(BoardArticleDto request) {
+        Long userSeq = SecurityUtil.getUserSeq();
+        if (!FormatUtil.Number.isPositive(request.getSeq())) {
+            throw new CodeboardException("잘못된 요청입니다.");
+        }
+        BoardArticleEntity targetArticle = articleDAO.findBySeqAndRegUserSeq(request.getSeq(), userSeq)
+                .orElseThrow(()->new CodeboardException("대상을 찾을수 없습니다."));
+
+        targetArticle.setDelDate(LocalDateTime.now());
+        articleDAO.save(targetArticle);
+
+        return mapBoardArticle(targetArticle, false);
+    }
+
+    /**
      * entity, dto 맵핑용
      * @param entity
      * @return
@@ -218,6 +237,7 @@ public class BoardArticleService {
         articleDto.setBoardSeq(entity.getBoardSeq());
         articleDto.setTitle(entity.getTitle());
         articleDto.setPublicFlag(EnumUtil.covertCodeboardEnum(YN.class, entity.getPublicFlag()));
+        articleDto.setRegUserSeq(entity.getRegUserSeq());
 
         articleDto.setSummary(entity.getSummary());
         articleDto.setContent(entity.getContent());
