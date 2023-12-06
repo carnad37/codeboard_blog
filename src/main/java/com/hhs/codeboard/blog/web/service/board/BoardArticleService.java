@@ -1,16 +1,19 @@
 package com.hhs.codeboard.blog.web.service.board;
 
 import com.hhs.codeboard.blog.config.except.CodeboardException;
-import com.hhs.codeboard.blog.config.except.CodeboardParameterException;
+import com.hhs.codeboard.blog.config.except.RequestException;
 import com.hhs.codeboard.blog.config.except.NotFoundDataException;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleContentDto;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleResponse;
 import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleContentEntity;
 import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleContentEntity;
 import com.hhs.codeboard.blog.data.entity.board.entity.QBoardArticleEntity;
+import com.hhs.codeboard.blog.data.entity.common.dto.DataFormatDto;
+import com.hhs.codeboard.blog.data.entity.common.dto.FileDto;
+import com.hhs.codeboard.blog.data.entity.common.dto.ProcessResultDto;
+import com.hhs.codeboard.blog.data.entity.common.entity.QFileEntity;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
-import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
 import com.hhs.codeboard.blog.data.entity.menu.entity.QMenuEntity;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleDto;
 import com.hhs.codeboard.blog.data.entity.board.entity.BoardArticleEntity;
@@ -18,11 +21,14 @@ import com.hhs.codeboard.blog.data.repository.ArticleContentDAO;
 import com.hhs.codeboard.blog.data.repository.ArticleDAO;
 import com.hhs.codeboard.blog.data.repository.MenuDAO;
 import com.hhs.codeboard.blog.enumeration.EditorType;
+import com.hhs.codeboard.blog.enumeration.ErrorType;
+import com.hhs.codeboard.blog.enumeration.FileType;
 import com.hhs.codeboard.blog.enumeration.YN;
 import com.hhs.codeboard.blog.util.common.EnumUtil;
 import com.hhs.codeboard.blog.util.common.FormatUtil;
 import com.hhs.codeboard.blog.util.service.QueryUtil;
 import com.hhs.codeboard.blog.util.service.SecurityUtil;
+import com.hhs.codeboard.blog.web.service.common.FileService;
 import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -30,12 +36,12 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.LongSupplier;
@@ -50,10 +56,12 @@ public class BoardArticleService {
     private final MenuService menuService;
     private final ArticleContentDAO contentDAO;
     private final JPAQueryFactory jpaQueryFactory;
+    private final FileService fileService;
 
     private final QMenuEntity menu = QMenuEntity.menuEntity;
     private final QBoardArticleEntity article = QBoardArticleEntity.boardArticleEntity;
     private final QBoardArticleContentEntity articleContent = QBoardArticleContentEntity.boardArticleContentEntity;
+    private final QFileEntity file = QFileEntity.fileEntity;
 
     /**
      * 게시물 저장
@@ -69,7 +77,7 @@ public class BoardArticleService {
         if (FormatUtil.Number.isPositive(request.getSeq())) {
             // articleSeq
             entity = articleDAO.findBySeqAndRegUserSeq(request.getSeq(), userSeq)
-                    .orElseThrow(()->new CodeboardParameterException("게시물 정보가 잘못되었습니다."));
+                    .orElseThrow(()->CodeboardException.error(ErrorType.NOT_FOUND_DATA));
         } else {
             // 새등록일 경우
             entity = new BoardArticleEntity();
@@ -83,7 +91,7 @@ public class BoardArticleService {
             memberDto.setUserSeq(userSeq);
 
             if (Objects.isNull(menuService.getMenu(menuDto, memberDto))) {
-                throw new CodeboardParameterException("잘못된 접근입니다.");
+                CodeboardException.error(ErrorType.NOT_FOUND_DATA);
             }
 
             entity.setBoardSeq(request.getBoardSeq());
@@ -100,43 +108,52 @@ public class BoardArticleService {
         // entity.setCategorys(request.getCategorySeq());
         articleDAO.save(entity);
 
+        // 하위 파일 처리
+        if (!CollectionUtils.isEmpty(request.getUploadFiles())) {
+            jpaQueryFactory.update(file)
+                .set(file.modDate, LocalDateTime.now())
+                .set(file.modUserSeq, userSeq)
+                .set(file.typeSeq, entity.getSeq())
+                .where(file.regUserSeq.eq(userSeq), file.typeSeq.isNull(), file.delDate.isNull())
+                .execute();
+        }
+
         // 하위 컨텐츠 처리
-        Optional.of(request)
-            .map(BoardArticleDto::getUploadContents)
-            .ifPresent(contents->{
-                if (!CollectionUtils.isEmpty(contents.getInsert())) {
-                    // bulk insert는 jdbc Template를 이용하거나 Jpa의 saveAll을 이용하는방법이 있는데, saveAll도 결국은 한땀한땀 insert
-                    // bulk insert를 jdbc로 썼다간 orm의 의미가 없는거같아서 그냥 saveAll 단일쿼리로 처리
-                    contentDAO.saveAll(
-                        contents.getInsert().stream()
-                            .map(target->this.saveBoardArticleContent(target, entity))
-                            .toList()
-                    );
-                }
+        if (request.getUploadContents() != null) {
+            DataFormatDto<BoardArticleContentDto> contents = request.getUploadContents();
+            if (!CollectionUtils.isEmpty(contents.getInsert())) {
+                // bulk insert는 jdbc Template를 이용하거나 Jpa의 saveAll을 이용하는방법이 있는데, saveAll도 결국은 한땀한땀 insert
+                // bulk insert를 jdbc로 썼다간 orm의 의미가 없는거같아서 그냥 saveAll 단일쿼리로 처리
+                contentDAO.saveAll(
+                    contents.getInsert().stream()
+                        .map(target->this.saveBoardArticleContent(target, entity))
+                        .toList()
+                );
+            }
 
-                if (!CollectionUtils.isEmpty(contents.getUpdate())) {
-                    contents.getUpdate()
-                        .forEach(target->{
-                            BoardArticleContentEntity contentEntity = this.saveBoardArticleContent(target, entity);
-                            contentDAO.save(contentEntity);
-                        });
-                }
+            if (!CollectionUtils.isEmpty(contents.getUpdate())) {
+                contents.getUpdate()
+                    .forEach(target->{
+                        BoardArticleContentEntity contentEntity = this.saveBoardArticleContent(target, entity);
+                        contentDAO.save(contentEntity);
+                    });
+            }
 
-                if (!CollectionUtils.isEmpty(contents.getDelete())) {
-                    jpaQueryFactory.update(articleContent)
-                        .set(articleContent.delDate, LocalDateTime.now())
-                        .where(
-                            articleContent.article.eq(entity),
-                            articleContent.seq.in(
-                                contents.getDelete().stream()
-                                    .map(BoardArticleContentDto::getSeq)
-                                    .filter(FormatUtil.Number::isPositive)
-                                    .toList()
-                            )
+            if (!CollectionUtils.isEmpty(contents.getDelete())) {
+                jpaQueryFactory.update(articleContent)
+                    .set(articleContent.delDate, LocalDateTime.now())
+                    .where(
+                        articleContent.article.eq(entity),
+                        articleContent.seq.in(
+                            contents.getDelete().stream()
+                                .map(BoardArticleContentDto::getSeq)
+                                .filter(FormatUtil.Number::isPositive)
+                                .toList()
                         )
-                        .execute();
-                }
-            });
+                    )
+                    .execute();
+            }
+        }
         return mapBoardArticle(entity, false);
     }
 
@@ -144,10 +161,10 @@ public class BoardArticleService {
     public BoardArticleDto selectArticle(@NotNull Long articleSeq) throws CodeboardException {
         // validate
         if (!FormatUtil.Number.isPositive(articleSeq)) {
-            throw new CodeboardParameterException("잘못된 파라미터입니다.");
+            CodeboardException.error(ErrorType.INVALID_PARAMETER, "게시물구분자");
         }
 
-        MemberDto memberDto = SecurityUtil.getUser();
+        MemberDto memberDto = SecurityUtil.isLogin() ? SecurityUtil.getUser() : null;
 
         // condition
         BooleanExpression[] whereArray = {
@@ -161,7 +178,7 @@ public class BoardArticleService {
                         .where(whereArray)
                         .fetchOne()
             ).map(target->this.mapBoardArticle(target, true))
-            .orElseThrow(()->new NotFoundDataException("게시물을 찾을수 없습니다"));
+            .orElseThrow(()-> CodeboardException.error(ErrorType.NOT_FOUND_DATA));
     }
 
     /**
@@ -172,7 +189,7 @@ public class BoardArticleService {
      */
     public BoardArticleResponse selectArticleList(BoardArticleDto articleRequest) {
         // validate
-        MemberDto memberDto = SecurityUtil.getUser();
+        MemberDto memberDto = SecurityUtil.isLogin() ? SecurityUtil.getUser() : null;
 
         List<BooleanExpression> whereList = Arrays.asList(
                 QueryUtil.stringNullable(articleRequest.getTitle(), article.title::contains),
@@ -214,10 +231,10 @@ public class BoardArticleService {
     public BoardArticleDto deleteArticle(BoardArticleDto request) {
         Long userSeq = SecurityUtil.getUserSeq();
         if (!FormatUtil.Number.isPositive(request.getSeq())) {
-            throw new CodeboardException("잘못된 요청입니다.");
+            CodeboardException.error(ErrorType.INVALID_PARAMETER, "게시물번호");
         }
         BoardArticleEntity targetArticle = articleDAO.findBySeqAndRegUserSeq(request.getSeq(), userSeq)
-                .orElseThrow(()->new CodeboardException("대상을 찾을수 없습니다."));
+                .orElseThrow(()->CodeboardException.error(ErrorType.NOT_FOUND_DATA));
 
         targetArticle.setDelDate(LocalDateTime.now());
         articleDAO.save(targetArticle);
@@ -308,6 +325,16 @@ public class BoardArticleService {
         }
 
         return entity;
+    }
+
+    public FileDto saveImage(MultipartFile file) throws IOException, CodeboardException {
+        FileDto response = new FileDto();
+
+        ProcessResultDto imageSaveResult = fileService.upload(FileType.ARTICLE_CONTENT, SecurityUtil.getUserSeq(), file);
+        response.setSeq(imageSaveResult.getSeq());
+        response.setSavFileName(imageSaveResult.getResult());
+
+        return response;
     }
 
 

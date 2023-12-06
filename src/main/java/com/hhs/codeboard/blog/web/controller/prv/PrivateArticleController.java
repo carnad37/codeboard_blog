@@ -3,7 +3,9 @@ package com.hhs.codeboard.blog.web.controller.prv;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleDto;
 import com.hhs.codeboard.blog.data.entity.board.dto.BoardArticleResponse;
 import com.hhs.codeboard.blog.data.entity.common.dto.CommonResponse;
+import com.hhs.codeboard.blog.data.entity.common.dto.FileDto;
 import com.hhs.codeboard.blog.web.service.board.BoardArticleService;
+import com.hhs.codeboard.blog.web.service.common.FileService;
 import com.hhs.codeboard.blog.web.service.menu.MenuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,12 @@ public class PrivateArticleController {
 
     private final BoardArticleService articleService;
     private final MenuService menuService;
+    @PostMapping("/saveImage")
+    public ResponseEntity<CommonResponse<FileDto>> saveImage(BoardArticleDto request) throws Exception {
+        FileDto result = articleService.saveImage(request.getUploadFile());
+        CommonResponse<FileDto> response = new CommonResponse<>(result);
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/save")
     public ResponseEntity<CommonResponse<BoardArticleDto>> save(@ParameterObject  @RequestBody BoardArticleDto request) {

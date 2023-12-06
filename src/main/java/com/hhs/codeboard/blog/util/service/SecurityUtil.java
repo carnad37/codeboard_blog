@@ -2,6 +2,7 @@ package com.hhs.codeboard.blog.util.service;
 
 import com.hhs.codeboard.blog.config.except.CodeboardException;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
+import com.hhs.codeboard.blog.enumeration.ErrorType;
 import lombok.experimental.UtilityClass;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -37,7 +38,7 @@ public class SecurityUtil {
         return Optional.ofNullable(getSecurityContextHolder())
                 .filter(target->isLogin())
                 .map(target->(MemberDto) target.getPrincipal())
-                .orElse(null);
+                .orElseThrow(()-> CodeboardException.error(ErrorType.NOT_LOGIN));
     }
 
     public static Long getUserSeq() {
@@ -45,7 +46,7 @@ public class SecurityUtil {
                     .filter(target->isLogin())
                     .map(target->(MemberDto) target.getPrincipal())
                     .map(MemberDto::getUserSeq)
-                    .orElseThrow(()-> new CodeboardException("로그인중이 아닙니다."));
+                    .orElseThrow(()-> CodeboardException.error(ErrorType.NOT_LOGIN));
     }
 
     public static String getEmail() {

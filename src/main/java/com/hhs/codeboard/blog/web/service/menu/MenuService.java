@@ -1,10 +1,11 @@
 package com.hhs.codeboard.blog.web.service.menu;
 
 import com.hhs.codeboard.blog.config.except.CodeboardException;
-import com.hhs.codeboard.blog.config.except.CodeboardParameterException;
+import com.hhs.codeboard.blog.config.except.RequestException;
 import com.hhs.codeboard.blog.config.except.NotFoundDataException;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
 import com.hhs.codeboard.blog.data.entity.menu.entity.QMenuEntity;
+import com.hhs.codeboard.blog.enumeration.ErrorType;
 import com.hhs.codeboard.blog.enumeration.MenuTypeEnum;
 import com.hhs.codeboard.blog.data.entity.menu.dto.MenuDto;
 import com.hhs.codeboard.blog.data.entity.menu.entity.MenuEntity;
@@ -20,8 +21,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.service.spi.ServiceException;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.querydsl.core.types.Predicate;
@@ -30,7 +29,6 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -59,7 +57,7 @@ public class MenuService {
         boolean publicFlag = privateChecker(menuDto);
 
         if (menuDto.getSeq() == null || menuDto.getSeq() < 1) {
-            throw new CodeboardParameterException("타겟 정보가 없습니다.");
+            CodeboardException.error(ErrorType.INVALID_PARAMETER, "메뉴구분자");
         }
 
         Predicate[] wheres = getDefaultConditionToArray(menuDto);
@@ -127,9 +125,7 @@ public class MenuService {
         // validate
         // parameter
         if (!MenuTypeEnum.BOARD.equals(menuType) && !MenuTypeEnum.MENU.equals(menuType)) {
-            throw new CodeboardParameterException("허용되지 않은 타입입니다.");
-        } else if (!SecurityUtil.isLogin()) {
-            throw new CodeboardParameterException("로그인이 되어있지 않습니다.");
+            CodeboardException.error(ErrorType.INVALID_PARAMETER, "메뉴타입");
         }
 
         MemberDto memberDto = SecurityUtil.getUser();
@@ -144,7 +140,7 @@ public class MenuService {
             // 부모가 본인 게시판인지 확인
             MenuEntity parentMenu = getParentMenu(menuDto, memberDto);
             if (Objects.isNull(parentMenu)) {
-                throw new CodeboardParameterException("잘못된 접근입니다");
+                CodeboardException.error(ErrorType.NOT_FOUND_DATA);
             } else {
                 insert.setParent(parentMenu);
             }
@@ -174,21 +170,16 @@ public class MenuService {
     public MenuDto updateMenu(MenuDto menuDto) throws CodeboardException {
 
         // validate
+        RequestException.valid(menuDto.getTitle(), "메뉴명");
+        RequestException.valid(menuDto.getPublicFlag(), "공개여부");
 
         // parameter
-        if (!SecurityUtil.isLogin()) {
-            throw new CodeboardParameterException("로그인이 되어있지 않습니다.");
-        } else if (
-                !StringUtils.hasText(menuDto.getTitle())
-                || Objects.isNull(menuDto.getPublicFlag())
-        ) {
-            throw new CodeboardParameterException("잘못된 요청입니다.");
-        }
+
         MemberDto memberDto = SecurityUtil.getUser();
 
         // 메뉴 확인
         MenuEntity targetMenu = getMenu(menuDto, memberDto);
-        if (targetMenu == null) throw new NotFoundDataException("게시물을 찾을 수 없습니다.");
+        if (targetMenu == null) CodeboardException.error(ErrorType.NOT_FOUND_DATA);
 
         // 변경 가능한 파리미터
         targetMenu.setTitle(menuDto.getTitle());
@@ -240,7 +231,7 @@ public class MenuService {
         } else if (menuDto.getSeq() != null && menuDto.getSeq() > 0) {
             whereArray[0] = menu.seq.eq(menuDto.getSeq());
         } else {
-            throw new CodeboardParameterException("잘못된 파라미터 입니다.");
+            CodeboardException.error(ErrorType.INVALID_PARAMETER, "메뉴구분자");
         }
 
         return jpaQueryFactory

@@ -3,6 +3,7 @@ package com.hhs.codeboard.blog.web.service.member.impl;
 import com.hhs.codeboard.blog.config.except.CodeboardException;
 import com.hhs.codeboard.blog.data.entity.common.dto.CommonResponse;
 import com.hhs.codeboard.blog.data.entity.member.dto.MemberDto;
+import com.hhs.codeboard.blog.enumeration.ErrorType;
 import com.hhs.codeboard.blog.web.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,7 +20,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public MemberDto getSelfInfo(String email) {
 
-		CommonResponse<MemberDto> result;
+		CommonResponse<MemberDto> result = null;
 		try {
 			result = memberClient.get()
 					.uri("/private/user/selfInfo")
@@ -31,7 +32,7 @@ public class MemberServiceImpl implements MemberService {
 				throw new NullPointerException();
 			}
 		} catch (RuntimeException re) {
-			throw new CodeboardException("회원정보 획득에 실패하였습니다.");
+			CodeboardException.error(ErrorType.API_ERROR, "회원");
 		}
 		return result.getData();
 	}

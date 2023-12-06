@@ -16,4 +16,6 @@ spring:
 
 codeboard:
   member: http://codeboard-member:8080
+  file:
+    path: /upload
 

@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum FileType implements CodeboardEnum {
 
-    ARTICLE_CONTENT("AC");
+    ARTICLE_CONTENT("AC", "article_content");
 
-    private final String code;
+    private final String code, addName;
 }

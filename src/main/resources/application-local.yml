@@ -23,6 +23,8 @@ spring:
 
 codeboard:
   member: http://localhost:10098
+  file:
+    path: /Users/hwanghyeonsu/workspace/upload
 
 logging.level:
   org:

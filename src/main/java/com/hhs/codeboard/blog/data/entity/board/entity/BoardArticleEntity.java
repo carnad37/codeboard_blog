@@ -44,6 +44,7 @@ public class BoardArticleEntity extends DefaultEntity{
 
 //    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY)
     @OneToMany(fetch = FetchType.LAZY)
+    @OrderBy("contentOrder asc")
     @JoinColumn(name = "article_seq")
     private List<BoardArticleContentEntity> contents;
 

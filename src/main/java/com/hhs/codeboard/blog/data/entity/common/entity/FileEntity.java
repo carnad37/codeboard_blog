@@ -15,6 +15,8 @@ import org.hibernate.annotations.Where;
  * 해당값은 컨텐츠 저장이 완료되면 그떄 저장된다.
  * (컨텐츠 저장시, seq값이랑 같이 전송)
  * 만약 컨텐츠 저장에 성공하면 typeSeq값이 해당 컨텐츠 값으로 저장된다.
+ *
+ * 차후 common api를 만들어서 분리.
  */
 @Getter
 @Setter
@@ -33,11 +35,14 @@ public class FileEntity extends DefaultEntity {
     @Column(nullable = false)
     private String fileType;
 
+    /**
+     * 차후 업데이트됨. 해당값이 없으면 주기적으로 삭제.
+     */
     @Column
-    private Integer typeSeq;
+    private Long typeSeq;
 
     @Column(nullable = false)
-    private Integer fileSize;
+    private Long fileSize;
 
     @Column(nullable = false)
     private String mime;
