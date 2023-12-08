@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -91,6 +92,13 @@ public class FileService {
         result.setResult(saveFile.getSavFileName());
         return result;
 
+    }
+
+    public void delete(String fileName) {
+        File target = new File(fileUploadDest, fileName);
+        if (target.exists() && target.isFile()) {
+            target.delete();
+        }
     }
 
 
