@@ -293,6 +293,7 @@ public class BoardArticleService {
         contentDto.setContent(entity.getContent());
         contentDto.setEditor(EnumUtil.covertCodeboardEnum(EditorType.class, entity.getEditor()));
         contentDto.setContentOrder(entity.getContentOrder());
+        contentDto.setLangType(entity.getLangType());
         return contentDto;
     }
 
@@ -313,6 +314,7 @@ public class BoardArticleService {
                 entity.setContent(dto.getContent());
                 entity.setContentOrder(dto.getContentOrder());
                 entity.setEditor(dto.getEditor().getCode());
+                entity.setLangType(dto.getLangType());
             }
         } else {
             // insert
@@ -322,6 +324,7 @@ public class BoardArticleService {
             entity.setEditor(dto.getEditor().getCode());
             entity.setContent(dto.getContent());
             entity.setRegDate(toDate);
+            entity.setLangType(dto.getLangType());
         }
 
         return entity;

@@ -19,5 +19,6 @@ public class BoardArticleContentDto implements Serializable {
     private EditorType editor;
     private String content;
     private Long contentOrder;
+    private String langType;
 
 }

@@ -36,6 +36,9 @@ public class BoardArticleContentEntity extends DefaultDateEntity {
     @Column(nullable = false)
     private Long contentOrder;
 
+    @Column
+    private String langType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_seq", updatable = false)
     private BoardArticleEntity article;
