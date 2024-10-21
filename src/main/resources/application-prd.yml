@@ -9,13 +9,13 @@ server:
 #    password: test01#
 spring:
   datasource:
-    url: jdbc:mariadb://codeboard-blog-db:3306/codeboard_blog
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: root
-    password: testdb#
+    url: ${BLOG_DB_URL}
+    driver-class-name: ${BLOG_DB_DRIVER}
+    username: ${BLOG_DB_USER}
+    password: ${BLOG_DB_PASSWD}
 
 codeboard:
-  member: http://codeboard-member:8080
+  member: codeboard-member.svc
   file:
     path: /upload
 
