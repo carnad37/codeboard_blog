@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codeboard-blog-api
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: codeboard-blog-api
+  template:
+    metadata:
+      labels:
+        app: codeboard-blog-api
+    spec:
+      containers:
+        - image: gitea-http.gitea.svc.cluster.local:3000/gitea_admin/container_test:latest
+          name: codeboard-blog-api
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: codeboard-blog-api-svc
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: codeboard-blog-api
